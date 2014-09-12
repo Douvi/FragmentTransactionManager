@@ -234,6 +234,10 @@ public class FragmentTransactionManager {
 	public void setRestoringState(boolean state) {
 		isRestoringState = state;
 	}
+	
+	public String getCurrentStack(){
+		return mCurrentTag;
+	}
 
 	public Parcelable onSaveInstanceState(Parcelable parcelable) {
 		mStack = new SavedStackState(parcelable);

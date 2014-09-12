@@ -61,4 +61,8 @@ public class FragmentTransactionBuilder {
 	public boolean isStackEmpty() {
 		return mFragmentsStack.isStackEmpty();
 	}
+	
+	public String getCurrentStackName(){
+		return mFragmentsStack.getCurrentStack();
+	}
 }

@@ -42,7 +42,7 @@ public class Adapter extends ArrayAdapter<String> {
 
 		mTextView.setText(text);
 		
-		row.setTag(text);
+		row.setTag(position);
 		row.setOnClickListener(mListener);
 		
 		return(row);

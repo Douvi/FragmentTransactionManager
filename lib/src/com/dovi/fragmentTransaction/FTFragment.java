@@ -19,6 +19,11 @@ public class FTFragment extends Fragment {
 	}
 	
 	public static FTFragment instantiate(Context context, String fragment, Bundle bundle, Animation animIn, Animation animOut) {
+		
+		if (bundle == null) {
+			bundle = new Bundle();
+		}
+	
 		f = (FTFragment) FTFragment.instantiate(context, fragment, bundle);
 		f.mAnimIn = animIn;
 		f.mAnimOut = animOut;

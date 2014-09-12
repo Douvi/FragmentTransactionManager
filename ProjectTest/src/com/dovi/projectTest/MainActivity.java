@@ -25,6 +25,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 	public TextView tab2;
 	public TextView tab3;
 
+	public String currentStack;
+	
 	@Override
 	protected void onCreate(Bundle arg0) {
 		// TODO Auto-generated method stub
@@ -69,6 +71,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			
 			Bundle mBundle = new Bundle();
 			mBundle.putString("title", "Tab1");
+			mBundle.putString("stack", "ContentTab1");
 			mFragmentTransactionBuilder.addFragmentInStack("ContentTab1", FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 		}
 	}
@@ -77,6 +80,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 	public void onBackPressed() {
 		// TODO Auto-generated method stub
 
+		currentStack = mFragmentTransactionBuilder.getCurrentStackName();
+		
 		if (mMenu.isMenuShowing()) {
 
 			if (mFragmentTransactionBuilder.isStackEmpty("Menu")) {
@@ -84,6 +89,15 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			} else {
 				mFragmentTransactionBuilder.removeTopFragmentInStackWithAnimation("Menu", true);
 			}
+			
+		} else if (currentStack.endsWith("ContentTab1") || currentStack.endsWith("ContentTab2") || currentStack.endsWith("ContentTab3")) {
+			
+			if (mFragmentTransactionBuilder.isStackEmpty()) {
+				super.onBackPressed();
+			}else {
+				mFragmentTransactionBuilder.removeTopFragmentInStackWithAnimation(true);
+			}
+			
 		} else {
 			super.onBackPressed();
 		}
@@ -102,6 +116,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			} else {
 				mFragmentTransactionBuilder.createTag("ContentTab1", R.id.fragmentContent, 1);
 				mBundle.putString("title", "Tab1");
+				mBundle.putString("stack", "ContentTab1");
 				mFragmentTransactionBuilder.addFragmentInStack("ContentTab1",
 						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 
@@ -115,6 +130,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			} else {
 				mFragmentTransactionBuilder.createTag("ContentTab2", R.id.fragmentContent, 1);
 				mBundle.putString("title", "Tab2");
+				mBundle.putString("stack", "ContentTab2");
 				mFragmentTransactionBuilder.addFragmentInStack("ContentTab2",
 						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 
@@ -128,6 +144,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			} else {
 				mFragmentTransactionBuilder.createTag("ContentTab3", R.id.fragmentContent, 1);
 				mBundle.putString("title", "Tab3");
+				mBundle.putString("stack", "ContentTab3");
 				mFragmentTransactionBuilder.addFragmentInStack("ContentTab3",
 						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 

@@ -20,7 +20,6 @@ public class MainMenuFragment extends FTFragment implements OnClickListener {
 
 	private ListView mList;
 	private Adapter mAdapter;
-	private int position;
 	private String tag;
 	private MainActivity mActivity;
 

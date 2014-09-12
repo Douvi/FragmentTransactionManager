@@ -20,9 +20,7 @@ public class SubMenuFagment extends FTFragment implements OnClickListener {
 	private ListView mList;
 	private Adapter mAdapter;
 	private String title;
-	private int position;
 	private String tag;
-	private String click = "NONE";
 	private MainActivity mActivity;
 
 	@Override
@@ -51,7 +49,6 @@ public class SubMenuFagment extends FTFragment implements OnClickListener {
 		mAdapter = new Adapter(getActivity(), mListString, this);
 		mList.setAdapter(mAdapter);
 
-//		mActivity.mTitle.setText(click);
 	}
 
 	@Override

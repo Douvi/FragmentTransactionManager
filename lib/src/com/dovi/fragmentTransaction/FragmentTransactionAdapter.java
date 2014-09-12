@@ -197,6 +197,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				}
 
 				fragment = (FTFragment) Fragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle);
+				fragment.mExtraOutState = mSavedFragment.mBundle;
 				fragment.mAnimIn = Animation.getAnimation(mSavedFragment.mAnimIn);
 				fragment.mAnimOut = Animation.getAnimation(mSavedFragment.mAnimOut);
 				fragment.setMenuVisibility(false);
@@ -221,6 +222,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 						}
 
 						FTFragment fragmentTemp = (FTFragment) Fragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle);
+						fragmentTemp.mExtraOutState = mSavedFragment.mBundle;
 						fragmentTemp.mAnimIn = Animation.getAnimation(mSavedFragment.mAnimIn);
 						fragmentTemp.mAnimOut = Animation.getAnimation(mSavedFragment.mAnimOut);
 						fragmentTemp.setMenuVisibility(false);
@@ -335,7 +337,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 
 			for (int i = 0; i < mDetachedFragments.size(); i++) {
 				fragment = mDetachedFragments.get(i);
-				fragment.onSaveInstanceState(fragment.getArguments());
+				fragment.onSaveInstanceState(fragment.mExtraOutState);
 				state.putBundle("fragment-detached-bundle" + i, fragment.mExtraOutState);
 				state.putInt("fragment-detached-animIn" + i, fragment.mAnimIn.getAnimation());
 				state.putInt("fragment-detached-animOut" + i, fragment.mAnimOut.getAnimation());
@@ -344,7 +346,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 		}
 
 		if (mCurrentPrimaryItem != null) {
-			mCurrentPrimaryItem.onSaveInstanceState(mCurrentPrimaryItem.getArguments());
+			mCurrentPrimaryItem.onSaveInstanceState(mCurrentPrimaryItem.mExtraOutState);
 			state.putBundle("primary-fragment-bundle", mCurrentPrimaryItem.mExtraOutState);
 			state.putInt("primary-fragment-animIn", mCurrentPrimaryItem.mAnimIn.getAnimation());
 			state.putInt("primary-fragment-animOut", mCurrentPrimaryItem.mAnimOut.getAnimation());

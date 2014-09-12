@@ -21,6 +21,8 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 	private ListView mList;
 	private Adapter mAdapter;
 	private String title;
+	private String stack;
+	private int count;
 	private String tag;
 	private MainActivity mActivity;
 
@@ -33,6 +35,8 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 		mList = (ListView) mView.findViewById(R.id.list);
 
 		title = getArguments().getString("title");
+		stack = getArguments().getString("stack");
+		count = getArguments().getInt("count", 0);
 		
 		return mView;
 	}
@@ -44,7 +48,7 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 
 		List<String> mListString = new ArrayList<String>();
 		for (int i = 0; i < 50; i++) {
-			mListString.add(i+" "+title);
+			mListString.add(i+" "+title + " | position : "+count);
 		}
 
 		mAdapter = new Adapter(getActivity(), mListString, this);
@@ -57,11 +61,15 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		tag = v.getTag().toString();
 
+		count++;
+		
 		Bundle mBundle = new Bundle();
-		mBundle.putString("title", tag);
+		mBundle.putString("title", title);
+		mBundle.putString("stack", stack);
+		mBundle.putInt("count", count);
 
-		mActivity.mFragmentTransactionBuilder.addFragmentInStack("Menu",
-				FTFragment.instantiate(mActivity, SubMenuFagment.class.getName(), mBundle, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
+		mActivity.mFragmentTransactionBuilder.addFragmentInStack(stack,
+				FTFragment.instantiate(mActivity, MainContentFragment.class.getName(), mBundle, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
 	}
 
 	@Override
