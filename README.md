@@ -37,7 +37,7 @@ How to Integrate this Library into Your Projects
 ------------------------------------------------
 In order to integrate FragmentTransactionManager into your own projects.
 
-__1.__     You need to set into you layout (xml) as a ROOT 'FTRelativeLayout' or 'FTLinearLayout'. You don't need
+__1.__     You need to set into your layout (xml) as a ROOT 'FTRelativeLayout' or 'FTLinearLayout'. You don't need
 to set the both layout, just one will be enough. 
 
 
@@ -71,7 +71,7 @@ LinearLayout
 
 ```
 
-__2.__       Into you activity you need to into your layout
+__2.__       Into you activity you need to init your layout
 
 
 Simple Exemple
@@ -81,7 +81,6 @@ Simple Exemple
     private FTRelativeLayout mRelativeLayout;
 
     protected void onCreate(Bundle arg0) {
-        // TODO Auto-generated method stub
         super.onCreate(arg0);
 
         setContentView(R.layout.main_activity);
@@ -91,8 +90,9 @@ Simple Exemple
 
 ```
 
-__3.__      This part is very important because you will init FragmentTransactionManager into (` protected void onResume() {}`)
-you need to check if FragmentTransactionManager is not restoring the state of your fragments
+__3.__      This part is very important, you have to check, before to add any stack or fragment into your FragmentTransactionManager, if 
+FragmentTransactionManager need to be restored. For that check the code below. For info, you HAVE TO init FragmentTransactionManager into 
+`onResume()`
 
 
 Simple Exemple
@@ -101,7 +101,6 @@ Simple Exemple
 
     @Override
     protected void onResume() {
-        // TODO Auto-generated method stub
         super.onResume();
 
         //Here you init FragmentTransactionManager
