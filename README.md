@@ -1,4 +1,4 @@
-FragmentTransactionManager ([Play Store Demo][1])
+FragmentTransactionManager ([Play Store Demo - comming soon][1])
 ===========
 
 FragmentTransactionManager is an Open Source Android library that allows developers to easily create applications 
@@ -12,18 +12,32 @@ Simple Methods
 -----
 ```java
 
+    //1     - You need to create a tag reference
+    //      - You need to add on it the ressource where go the content
+    //      - You need set up the number of fragments will stay alive before removed and save from the Manager
     mFragmentTransactionBuilder.createTag("Menu", R.id.menuContent, 1);
     
-    mFragmentTransactionBuilder.addFragmentInStack("Menu", FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
+    //2 - Your fragment ex:"MainMenuFragment" HAVE TO EXTENT FTFragment
+    //  - When you instantiate you fragment you need to add:
+    //        - the context
+    //        - the path of the fragment
+    //        - a Bundle
+    //        - an Animation when the fragment start
+    //        - an Animation when the fragment leave
+    MainMenuFragment mFragment = FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE);
+    mFragmentTransactionBuilder.addFragmentInStack("Menu", mFragment);
 
+
+    //3 - To go back to the preview fragment you need to call back the correct tag (ex: "Menu")
     mFragmentTransactionBuilder.removeTopFragmentInStackWithAnimation("Menu", true);
 
-    mFragmentTransactionBuilder.mshowTopFragmentInStack("Menu");
+    //4 - If differente tags are using the same ressourceID. You need just call back the correct tag to show the last Fragment again
+    mFragmentTransactionBuilder.showTopFragmentInStack("Menu");
 
 ```
 
 
-Here's an video of the example application in this repository : YoutTube Video[2]
+Here's an video of the example application in this repository : YoutTube Video - comming soon[2]
 
 
 Setup
