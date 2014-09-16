@@ -1,2 +1,11 @@
 
 *.class
+
+lib/bin/
+lib/gen/
+
+ProjectTest/bin/
+ProjectTest/gen/
+
+SlidingMenu/bin/
+SlidingMenu/gen/
