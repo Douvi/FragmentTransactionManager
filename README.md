@@ -106,7 +106,7 @@ Simple Exemple
         //Here you init FragmentTransactionManager
         mFragmentTransactionBuilder = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
         
-        //You need to check if it don't need to finish to restore the state of your fragments. If not you can init your stack
+        //You need to check if it don't need to finish to restore the state of your fragments. If not you can init your stacks
         if (mFragmentTransactionBuilder.isNeededToRestoreState()) {
             mFragmentTransactionBuilder.restoreState();
         } else {

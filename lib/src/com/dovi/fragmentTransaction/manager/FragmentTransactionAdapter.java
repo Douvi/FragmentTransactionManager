@@ -1,4 +1,4 @@
-package com.dovi.fragmentTransaction;
+package com.dovi.fragmentTransaction.manager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.dovi.fragmentTransaction.FragmentTransactionAdapter.Animation;
+import com.dovi.fragmentTransaction.FTFragment;
+import com.dovi.fragmentTransaction.R;
+import com.dovi.fragmentTransaction.R.anim;
+import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 
 public class FragmentTransactionAdapter extends SuperFragmentTransactionAdapter {
 
@@ -341,7 +344,8 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				state.putBundle("fragment-detached-bundle" + i, fragment.mExtraOutState);
 				state.putInt("fragment-detached-animIn" + i, fragment.mAnimIn.getAnimation());
 				state.putInt("fragment-detached-animOut" + i, fragment.mAnimOut.getAnimation());
-				mFragmentManager.putFragment(state, "fragment-detached-" + i, fragment);
+				state.putString("fragment-detached-path" + i, fragment.getClass().getName());
+				mCurrentTransaction.remove(fragment);
 			}
 		}
 
@@ -350,8 +354,12 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			state.putBundle("primary-fragment-bundle", mCurrentPrimaryItem.mExtraOutState);
 			state.putInt("primary-fragment-animIn", mCurrentPrimaryItem.mAnimIn.getAnimation());
 			state.putInt("primary-fragment-animOut", mCurrentPrimaryItem.mAnimOut.getAnimation());
-			mFragmentManager.putFragment(state, "primary-fragment", mCurrentPrimaryItem);
+			state.putString("primary-fragment-path", mCurrentPrimaryItem.getClass().getName());
+			state.putBoolean("primary-fragment-type", mCurrentPrimaryItem.isDetached());
+			mCurrentTransaction.remove(mCurrentPrimaryItem);
 		}
+		
+		
 		return state;
 	}
 
@@ -380,32 +388,31 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			
 			for (int i = 0; i < nb; i++) {
 
-				fragment = (FTFragment) mFragmentManager.getFragment(mBundle, "fragment-detached-" + i);
-				fragment.mExtraOutState = mBundle.getBundle("fragment-detached-bundle" + i);
-				
-				fragment.mAnimIn = Animation.getAnimation(mBundle.getInt("fragment-detached-animIn" + i));
-				fragment.mAnimOut = Animation.getAnimation(mBundle.getInt("fragment-detached-animOut" + i));
+				fragment = FTFragment.instantiate(mContext, mBundle.getString("fragment-detached-path" + i), mBundle.getBundle("fragment-detached-bundle" + i), Animation.getAnimation(mBundle.getInt("fragment-detached-animIn" + i)), Animation.getAnimation(mBundle.getInt("fragment-detached-animOut" + i)));
+
 				if (fragment != null) {
 					fragment.setMenuVisibility(false);
 					fragment.setUserVisibleHint(false);
 					mDetachedFragments.add(fragment);
-
-					this.getCurrentTransaction();
+					
 					mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(i + mSavedFragments.size()));
 					mCurrentTransaction.detach(fragment);
 				}
 			}
 
-			fragment = (FTFragment) mFragmentManager.getFragment(mBundle, "primary-fragment");
-			fragment.mExtraOutState = mBundle.getBundle("primary-fragment-bundle");
-			
-			fragment.mAnimIn = Animation.getAnimation(mBundle.getInt("primary-fragment-animIn"));
-			fragment.mAnimOut = Animation.getAnimation(mBundle.getInt("primary-fragment-animOut"));
+			fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn")), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut")));
 			
 			if (fragment != null) {
 				fragment.setMenuVisibility(false);
 				fragment.setMenuVisibility(false);
 				mCurrentPrimaryItem = fragment;
+				
+				mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(fragmentsNumb));
+				mIsCurrentPrimaryItemDetatch = mBundle.getBoolean("primary-fragment-type");
+				if (mIsCurrentPrimaryItemDetatch) {
+					mCurrentTransaction.detach(mCurrentPrimaryItem);
+				}
+				
 			} else {
 				Log.w(TAG, "Bad fragment at key " + "f");
 			}

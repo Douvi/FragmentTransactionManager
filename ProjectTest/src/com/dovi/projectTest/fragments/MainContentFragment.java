@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.dovi.fragmentTransaction.FTFragment;
-import com.dovi.fragmentTransaction.FragmentTransactionAdapter.Animation;
+import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 import com.dovi.projectTest.MainActivity;
 import com.dovi.projectTest.adapter.Adapter;
 import com.example.projecttest.R;
@@ -68,7 +68,7 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 		mBundle.putString("stack", stack);
 		mBundle.putInt("count", count);
 
-		mActivity.mFragmentTransactionBuilder.addFragmentInStack(stack,
+		mActivity.mFragmentTransactionManager.addFragmentInStack(stack,
 				FTFragment.instantiate(mActivity, MainContentFragment.class.getName(), mBundle, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
 	}
 

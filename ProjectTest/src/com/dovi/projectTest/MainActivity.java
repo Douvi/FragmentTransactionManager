@@ -7,10 +7,10 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.dovi.fragmentTransaction.FTFragment;
-import com.dovi.fragmentTransaction.FragmentTransactionAdapter.Animation;
-import com.dovi.fragmentTransaction.FragmentTransactionBuilder;
 import com.dovi.fragmentTransaction.OnSaveFragmentTransaction;
 import com.dovi.fragmentTransaction.layout.FTRelativeLayout;
+import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
+import com.dovi.fragmentTransaction.manager.FragmentTransactionManager;
 import com.dovi.projectTest.fragments.MainContentFragment;
 import com.dovi.projectTest.fragments.MainMenuFragment;
 import com.example.projecttest.R;
@@ -20,7 +20,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 
 	private SlidingMenu mMenu;
 	private FTRelativeLayout mRelativeLayout;
-	public FragmentTransactionBuilder mFragmentTransactionBuilder;
+	public FragmentTransactionManager mFragmentTransactionManager;
 	public TextView tab1;
 	public TextView tab2;
 	public TextView tab3;
@@ -59,20 +59,20 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 		// TODO Auto-generated method stub
 		super.onResume();
 
-		mFragmentTransactionBuilder = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
+		mFragmentTransactionManager = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
 		
-		if (mFragmentTransactionBuilder.isNeededToRestoreState()) {
-			mFragmentTransactionBuilder.restoreState();
+		if (mFragmentTransactionManager.isNeededToRestoreState()) {
+			mFragmentTransactionManager.restoreState();
 		} else {
-			mFragmentTransactionBuilder.createTag("Menu", R.id.menuContent, 1);
-			mFragmentTransactionBuilder.createTag("ContentTab1", R.id.fragmentContent, 1);
+			mFragmentTransactionManager.createTag("Menu", R.id.menuContent, 1);
+			mFragmentTransactionManager.createTag("ContentTab1", R.id.fragmentContent, 1);
 			
-			mFragmentTransactionBuilder.addFragmentInStack("Menu", FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
+			mFragmentTransactionManager.addFragmentInStack("Menu", FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
 			
 			Bundle mBundle = new Bundle();
 			mBundle.putString("title", "Tab1");
 			mBundle.putString("stack", "ContentTab1");
-			mFragmentTransactionBuilder.addFragmentInStack("ContentTab1", FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
+			mFragmentTransactionManager.addFragmentInStack("ContentTab1", FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 		}
 	}
 
@@ -80,22 +80,22 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 	public void onBackPressed() {
 		// TODO Auto-generated method stub
 
-		currentStack = mFragmentTransactionBuilder.getCurrentStackName();
+		currentStack = mFragmentTransactionManager.getCurrentStackNameFromContent(R.id.fragmentContent);
 		
 		if (mMenu.isMenuShowing()) {
 
-			if (mFragmentTransactionBuilder.isStackEmpty("Menu")) {
+			if (mFragmentTransactionManager.isStackEmpty("Menu")) {
 				mMenu.showContent();
 			} else {
-				mFragmentTransactionBuilder.removeTopFragmentInStackWithAnimation("Menu", true);
+				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation("Menu", true);
 			}
 			
 		} else if (currentStack.endsWith("ContentTab1") || currentStack.endsWith("ContentTab2") || currentStack.endsWith("ContentTab3")) {
 			
-			if (mFragmentTransactionBuilder.isStackEmpty()) {
+			if (mFragmentTransactionManager.isStackEmpty()) {
 				super.onBackPressed();
 			}else {
-				mFragmentTransactionBuilder.removeTopFragmentInStackWithAnimation(true);
+				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(true);
 			}
 			
 		} else {
@@ -111,13 +111,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 		switch (v.getId()) {
 		case R.id.tab1:
 			
-			if (mFragmentTransactionBuilder.getCountOfFragmentsInStack("ContentTab1") > 0) {
-				mFragmentTransactionBuilder.showTopFragmentInStack("ContentTab1");
+			if (mFragmentTransactionManager.getCountOfFragmentsInStack("ContentTab1") > 0) {
+				mFragmentTransactionManager.showTopFragmentInStack("ContentTab1");
 			} else {
-				mFragmentTransactionBuilder.createTag("ContentTab1", R.id.fragmentContent, 1);
+				mFragmentTransactionManager.createTag("ContentTab1", R.id.fragmentContent, 1);
 				mBundle.putString("title", "Tab1");
 				mBundle.putString("stack", "ContentTab1");
-				mFragmentTransactionBuilder.addFragmentInStack("ContentTab1",
+				mFragmentTransactionManager.addFragmentInStack("ContentTab1",
 						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 
 			}
@@ -125,13 +125,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			break;
 		case R.id.tab2:
 			
-			if (mFragmentTransactionBuilder.getCountOfFragmentsInStack("ContentTab2") > 0) {
-				mFragmentTransactionBuilder.showTopFragmentInStack("ContentTab2");
+			if (mFragmentTransactionManager.getCountOfFragmentsInStack("ContentTab2") > 0) {
+				mFragmentTransactionManager.showTopFragmentInStack("ContentTab2");
 			} else {
-				mFragmentTransactionBuilder.createTag("ContentTab2", R.id.fragmentContent, 1);
+				mFragmentTransactionManager.createTag("ContentTab2", R.id.fragmentContent, 1);
 				mBundle.putString("title", "Tab2");
 				mBundle.putString("stack", "ContentTab2");
-				mFragmentTransactionBuilder.addFragmentInStack("ContentTab2",
+				mFragmentTransactionManager.addFragmentInStack("ContentTab2",
 						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 
 			}
@@ -139,13 +139,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			break;
 		case R.id.tab3:
 			
-			if (mFragmentTransactionBuilder.getCountOfFragmentsInStack("ContentTab3") > 0) {
-				mFragmentTransactionBuilder.showTopFragmentInStack("ContentTab3");
+			if (mFragmentTransactionManager.getCountOfFragmentsInStack("ContentTab3") > 0) {
+				mFragmentTransactionManager.showTopFragmentInStack("ContentTab3");
 			} else {
-				mFragmentTransactionBuilder.createTag("ContentTab3", R.id.fragmentContent, 1);
+				mFragmentTransactionManager.createTag("ContentTab3", R.id.fragmentContent, 1);
 				mBundle.putString("title", "Tab3");
 				mBundle.putString("stack", "ContentTab3");
-				mFragmentTransactionBuilder.addFragmentInStack("ContentTab3",
+				mFragmentTransactionManager.addFragmentInStack("ContentTab3",
 						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 
 			}
@@ -157,9 +157,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 	}
 
 	@Override
-	public FragmentTransactionBuilder onSaveInstanceState() {
+	public FragmentTransactionManager onSaveInstanceState() {
 		// TODO Auto-generated method stub
-		return mFragmentTransactionBuilder;
+		return mFragmentTransactionManager;
 	}
 
 }

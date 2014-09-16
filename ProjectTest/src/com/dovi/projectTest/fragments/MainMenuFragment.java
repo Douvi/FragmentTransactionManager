@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.dovi.fragmentTransaction.FTFragment;
-import com.dovi.fragmentTransaction.FragmentTransactionAdapter.Animation;
+import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 import com.dovi.projectTest.MainActivity;
 import com.dovi.projectTest.adapter.Adapter;
 import com.example.projecttest.R;
@@ -57,7 +57,7 @@ public class MainMenuFragment extends FTFragment implements OnClickListener {
 		Bundle mBundle = new Bundle();
 		mBundle.putString("title", tag);
 
-		mActivity.mFragmentTransactionBuilder.addFragmentInStack("Menu",
+		mActivity.mFragmentTransactionManager.addFragmentInStack("Menu",
 				FTFragment.instantiate(mActivity, SubMenuFagment.class.getName(), mBundle, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
 	}
 

@@ -1,4 +1,4 @@
-package com.dovi.fragmentTransaction;
+package com.dovi.fragmentTransaction.manager;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,9 +14,10 @@ import android.support.v4.os.ParcelableCompatCreatorCallbacks;
 import android.view.View.BaseSavedState;
 import android.view.ViewGroup;
 
+import com.dovi.fragmentTransaction.FTFragment;
 import com.dovi.fragmentTransaction.exception.FragmentTransactionManagerException;
 
-public class FragmentTransactionManager {
+public class FragmentTransactionSuperManager {
 
 	private final ViewGroup mViewGroup;
 	private final Context mContext;
@@ -37,7 +38,7 @@ public class FragmentTransactionManager {
 
 	private Parcelable[] mRestoredStackAdapter = null;
 
-	public FragmentTransactionManager(Context context, FragmentManager fm, ViewGroup viewGroup) {
+	public FragmentTransactionSuperManager(Context context, FragmentManager fm, ViewGroup viewGroup) {
 		mViewGroup = viewGroup;
 		mContext = context;
 		mFragmentManager = fm;
@@ -238,6 +239,27 @@ public class FragmentTransactionManager {
 	public String getCurrentStack(){
 		return mCurrentTag;
 	}
+	
+	public String getCurrentStackNameFromContent(int ressourceId) {
+		
+		if (mRessouseTags.get(mCurrentTag) == ressourceId && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+			return mCurrentTag;
+		} else {
+			
+			for (String tag : mRessouseTags.keySet()) {
+				
+				if (mRessouseTags.get(tag) == ressourceId) {
+					
+					getCurrentAdapter(tag);
+					if (!mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+						return mCurrentTag;
+					}
+				}
+			}
+			
+			return "";
+		}
+	}
 
 	public Parcelable onSaveInstanceState(Parcelable parcelable) {
 		mStack = new SavedStackState(parcelable);
@@ -254,7 +276,9 @@ public class FragmentTransactionManager {
 		mStack.stackAdapter = new Parcelable[mStackTags.size()];
 		i = 0;
 		for (FragmentTransactionAdapter adapter : mStackTags.values()) {
+			adapter.getCurrentTransaction();
 			mStack.stackAdapter[i] = adapter.saveState();
+			adapter.finishUpdate(mViewGroup);
 			i++;
 		}
 
@@ -284,13 +308,6 @@ public class FragmentTransactionManager {
 
 		mStack = (SavedStackState) state;
 
-		mCurrentTag = mStack.currentTag;
-		mRestoredStackAdapter = mStack.stackAdapter;
-
-		mStackTags = new HashMap<String, FragmentTransactionAdapter>();
-		mRessouseTags = new HashMap<String, Integer>();
-		mDetachedNumTags = new HashMap<String, Integer>();
-
 		if (mFragmentManager != null) {
 			this.finishInitOnRestoreInstanceState();
 		}
@@ -299,6 +316,14 @@ public class FragmentTransactionManager {
 	}
 
 	public void finishInitOnRestoreInstanceState() {
+		
+		mCurrentTag = mStack.currentTag;
+		mRestoredStackAdapter = mStack.stackAdapter;
+
+		mStackTags = new HashMap<String, FragmentTransactionAdapter>();
+		mRessouseTags = new HashMap<String, Integer>();
+		mDetachedNumTags = new HashMap<String, Integer>();
+		
 		for (int i = 0; i < mStack.stackTags.length; i++) {
 
 			mCurrentTag = mStack.stackTags[i];
@@ -308,9 +333,10 @@ public class FragmentTransactionManager {
 
 			mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, mStack.stackTags[i], mStack.stackRessourses[i],
 					mStack.stackDetached[i]);
+			mCurrentAdapter.getCurrentTransaction();
 			mCurrentAdapter.restoreState(mRestoredStackAdapter[i], SavedStackState.class.getClassLoader());
 			mStackTags.put(mStack.stackTags[i], mCurrentAdapter);
-
+			mCurrentAdapter.finishUpdate(mViewGroup);
 		}
 
 		mStack = null;

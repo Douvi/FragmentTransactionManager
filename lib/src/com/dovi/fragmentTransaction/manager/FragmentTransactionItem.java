@@ -1,4 +1,6 @@
-package com.dovi.fragmentTransaction;
+package com.dovi.fragmentTransaction.manager;
+
+import com.dovi.fragmentTransaction.FTFragment;
 
 public class FragmentTransactionItem {
 

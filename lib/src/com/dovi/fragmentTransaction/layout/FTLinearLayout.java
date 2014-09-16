@@ -6,12 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
-import com.dovi.fragmentTransaction.FragmentTransactionBuilder;
 import com.dovi.fragmentTransaction.OnSaveFragmentTransaction;
+import com.dovi.fragmentTransaction.manager.FragmentTransactionManager;
 
 public class FTLinearLayout extends LinearLayout {
 
-	private FragmentTransactionBuilder fragmentManger;
+	private FragmentTransactionManager fragmentManger;
 	private OnSaveFragmentTransaction mLister;
 	
 	public FTLinearLayout(Context context, AttributeSet attrs) {
@@ -27,20 +27,20 @@ public class FTLinearLayout extends LinearLayout {
 		// TODO Auto-generated method stub
 		fragmentManger = mLister.onSaveInstanceState();
 		
-		return fragmentManger.mFragmentsStack.onSaveInstanceState(super.onSaveInstanceState());
+		return fragmentManger.mFragmentsManager.onSaveInstanceState(super.onSaveInstanceState());
 	}
 	
 	@Override
 	protected void onRestoreInstanceState(Parcelable state) {
 		// TODO Auto-generated method stub
-		fragmentManger = new FragmentTransactionBuilder(getContext(), null, null);
-		super.onRestoreInstanceState(fragmentManger.mFragmentsStack.onRestoreInstanceState(state));
+		fragmentManger = new FragmentTransactionManager(getContext(), null, null);
+		super.onRestoreInstanceState(fragmentManger.mFragmentsManager.onRestoreInstanceState(state));
 	}
 	
-	public FragmentTransactionBuilder getFragmentManger(FragmentManager mFragmentManager, OnSaveFragmentTransaction lister) {
+	public FragmentTransactionManager getFragmentManger(FragmentManager mFragmentManager, OnSaveFragmentTransaction lister) {
 		
 		if (fragmentManger == null) {
-			fragmentManger = new FragmentTransactionBuilder(getContext(), mFragmentManager, this);
+			fragmentManger = new FragmentTransactionManager(getContext(), mFragmentManager, this);
 		} else {
 			fragmentManger.setFragmentManager(mFragmentManager);
 		}
