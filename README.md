@@ -13,8 +13,9 @@ Simple Methods
 ```java
 
     //1     - You need to create a tag reference
-    //      - You need to add on it the ressource where go the content
-    //      - You need set up the number of fragments will stay alive before removed and save from the Manager
+    //      - Add on it the ressourceID corresponding to the correct content
+    //      - You need set up the number of fragments will stay alive and detached,
+    //        before be removed and saved into its stack
     mFragmentTransactionBuilder.createTag("Menu", R.id.menuContent, 1);
     
     //2 - Your fragment ex:"MainMenuFragment" HAVE TO EXTENT FTFragment
