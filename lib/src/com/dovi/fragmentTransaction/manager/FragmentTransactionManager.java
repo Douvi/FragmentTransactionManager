@@ -40,6 +40,10 @@ public class FragmentTransactionManager {
 		mFragmentsManager.addFragmentInStack(tag, fragment);
 	}
 	
+	public void addFragmentAsRootInStack(String tag, FTFragment fragment) {
+		mFragmentsManager.addFragmentAsRootInStack(tag, fragment);
+	}
+	
 	public void showTopFragmentInStack(String tag) {
 		mFragmentsManager.showTopFragmentInStack(tag);
 	}

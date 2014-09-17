@@ -91,6 +91,7 @@ public class FragmentTransactionAdapter extends SuperFragmentTransactionAdapter 
 	public void detach(FTFragment fragment) {
 		getCurrentTransaction();
 
+		fragment.onSaveInstanceState(fragment.mExtraOutState);
 		mCurrentTransaction.detach(fragment);
 		mIsCurrentPrimaryItemDetatch = true;
 	}
@@ -345,7 +346,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				state.putInt("fragment-detached-animIn" + i, fragment.mAnimIn.getAnimation());
 				state.putInt("fragment-detached-animOut" + i, fragment.mAnimOut.getAnimation());
 				state.putString("fragment-detached-path" + i, fragment.getClass().getName());
-				mCurrentTransaction.remove(fragment);
+//				mCurrentTransaction.remove(fragment);
 			}
 		}
 
@@ -356,7 +357,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			state.putInt("primary-fragment-animOut", mCurrentPrimaryItem.mAnimOut.getAnimation());
 			state.putString("primary-fragment-path", mCurrentPrimaryItem.getClass().getName());
 			state.putBoolean("primary-fragment-type", mCurrentPrimaryItem.isDetached());
-			mCurrentTransaction.remove(mCurrentPrimaryItem);
+//			mCurrentTransaction.remove(mCurrentPrimaryItem);
 		}
 		
 		
@@ -395,19 +396,21 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 					fragment.setUserVisibleHint(false);
 					mDetachedFragments.add(fragment);
 					
+					mCurrentTransaction.remove(fragment);
 					mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(i + mSavedFragments.size()));
 					mCurrentTransaction.detach(fragment);
 				}
 			}
-
-			fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn")), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut")));
+			
+			fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn", 0)), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut", 0)));
 			
 			if (fragment != null) {
 				fragment.setMenuVisibility(false);
 				fragment.setMenuVisibility(false);
 				mCurrentPrimaryItem = fragment;
 				
-				mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(fragmentsNumb));
+				mCurrentTransaction.remove(mCurrentPrimaryItem);
+				mCurrentTransaction.add(mContainerId, mCurrentPrimaryItem, this.getFragmentName(fragmentsNumb));
 				mIsCurrentPrimaryItemDetatch = mBundle.getBoolean("primary-fragment-type");
 				if (mIsCurrentPrimaryItemDetatch) {
 					mCurrentTransaction.detach(mCurrentPrimaryItem);

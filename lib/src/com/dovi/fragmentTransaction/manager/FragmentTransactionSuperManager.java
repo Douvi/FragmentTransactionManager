@@ -102,6 +102,25 @@ public class FragmentTransactionSuperManager {
 		mCurrentAdapter.finishUpdate(mViewGroup);
 		mStackTags.put(tag, mCurrentAdapter);
 	}
+	
+	public void addFragmentAsRootInStack(String tag, FTFragment fragment) {
+
+		if (fragment == null) {
+			throw new FragmentTransactionManagerException("the fragment must not be null  - Here an exemple of what you should do :");
+		}
+
+		if (!mStackTags.containsKey(tag)) {
+			throw new FragmentTransactionManagerException("The tag : '" + tag
+					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
+		}
+
+		mCurrentAdapter = mStackTags.get(tag);
+		mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, tag, mCurrentAdapter.mContainerId, mCurrentAdapter.mDetachFragmentLimited);
+		mStackTags.remove(tag);
+		mStackTags.put(tag, mCurrentAdapter);
+		
+		addFragmentInStack(tag, fragment);
+	}
 
 	public void showTopFragmentInStack(String tag) {
 
@@ -316,7 +335,7 @@ public class FragmentTransactionSuperManager {
 	}
 
 	public void finishInitOnRestoreInstanceState() {
-		
+		int numDetach;
 		mCurrentTag = mStack.currentTag;
 		mRestoredStackAdapter = mStack.stackAdapter;
 
@@ -327,15 +346,16 @@ public class FragmentTransactionSuperManager {
 		for (int i = 0; i < mStack.stackTags.length; i++) {
 
 			mCurrentTag = mStack.stackTags[i];
+			mCurrentRes = mStack.stackRessourses[i];
+			numDetach = mStack.stackDetached[i];
 			
-			mRessouseTags.put(mStack.stackTags[i], mStack.stackRessourses[i]);
-			mDetachedNumTags.put(mStack.stackTags[i], mStack.stackDetached[i]);
+			mRessouseTags.put(mCurrentTag, mCurrentRes);
+			mDetachedNumTags.put(mCurrentTag, numDetach);
 
-			mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, mStack.stackTags[i], mStack.stackRessourses[i],
-					mStack.stackDetached[i]);
+			mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, mCurrentTag, mCurrentRes, numDetach);
 			mCurrentAdapter.getCurrentTransaction();
 			mCurrentAdapter.restoreState(mRestoredStackAdapter[i], SavedStackState.class.getClassLoader());
-			mStackTags.put(mStack.stackTags[i], mCurrentAdapter);
+			mStackTags.put(mCurrentTag, mCurrentAdapter);
 			mCurrentAdapter.finishUpdate(mViewGroup);
 		}
 

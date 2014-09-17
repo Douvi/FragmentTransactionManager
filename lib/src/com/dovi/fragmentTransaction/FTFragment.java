@@ -20,6 +20,10 @@ public class FTFragment extends Fragment {
 	
 	public static FTFragment instantiate(Context context, String fragment, Bundle bundle, Animation animIn, Animation animOut) {
 		
+		if (fragment == null || fragment.length() == 0) {
+			return null;
+		}
+		
 		if (bundle == null) {
 			bundle = new Bundle();
 		}
