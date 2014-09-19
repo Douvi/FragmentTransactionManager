@@ -61,9 +61,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 
 		mFragmentTransactionManager = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
 		
-		if (mFragmentTransactionManager.isNeededToRestoreState()) {
-			mFragmentTransactionManager.restoreState();
-		} else {
+		if (!mFragmentTransactionManager.isContainTag("Menu")) {
 			mFragmentTransactionManager.createTag("Menu", R.id.menuContent, 1);
 			mFragmentTransactionManager.createTag("ContentTab1", R.id.fragmentContent, 1);
 			

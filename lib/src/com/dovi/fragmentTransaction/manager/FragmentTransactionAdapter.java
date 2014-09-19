@@ -323,13 +323,17 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 
 	@Override
 	public Parcelable saveState() {
+		Log.i("NAME_TAG_METHOD", "");
+		Log.i("NAME_TAG_METHOD", "		++++++++++++ BEGIN saveState BEGIN ++++++++++++");
 		Bundle state = null;
 		if (mSavedFragments.size() > 0) {
 			state = new Bundle();
 			SavedFragment[] savedFragmentArray = new SavedFragment[mSavedFragments.size()];
 			mSavedFragments.toArray(savedFragmentArray);
 			state.putParcelableArray("fragments", savedFragmentArray);
-		}
+		} 
+		
+		Log.i("NAME_TAG", "		--------> SAVED_FRAGMENT NB : "+mSavedFragments.size());
 
 		if (state == null) {
 			state = new Bundle();
@@ -346,9 +350,11 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				state.putInt("fragment-detached-animIn" + i, fragment.mAnimIn.getAnimation());
 				state.putInt("fragment-detached-animOut" + i, fragment.mAnimOut.getAnimation());
 				state.putString("fragment-detached-path" + i, fragment.getClass().getName());
-//				mCurrentTransaction.remove(fragment);
+				mCurrentTransaction.remove(fragment);
 			}
 		}
+		
+		Log.i("NAME_TAG", "		--------> SAVED_DETACHED_FRAGMENT NB : "+mDetachedFragments.size());
 
 		if (mCurrentPrimaryItem != null) {
 			mCurrentPrimaryItem.onSaveInstanceState(mCurrentPrimaryItem.mExtraOutState);
@@ -357,15 +363,20 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			state.putInt("primary-fragment-animOut", mCurrentPrimaryItem.mAnimOut.getAnimation());
 			state.putString("primary-fragment-path", mCurrentPrimaryItem.getClass().getName());
 			state.putBoolean("primary-fragment-type", mCurrentPrimaryItem.isDetached());
-//			mCurrentTransaction.remove(mCurrentPrimaryItem);
+			
+			Log.i("NAME_TAG", "		--------> SAVED_CURRENT_FRAGMENT : YES");
+		} else {
+			Log.i("NAME_TAG", "		--------> SAVED_CURRENT_FRAGMENT : NO");
 		}
 		
-		
+		Log.i("NAME_TAG_METHOD", "		++++++++++++ END saveState END ++++++++++++");
 		return state;
 	}
 
 	@Override
 	public void restoreState(Parcelable state, ClassLoader loader) {
+		Log.i("NAME_TAG_METHOD", "++++++++++++ BEGIN restoreState BEGIN ++++++++++++");
+		
 		if (state != null) {
 			Bundle bundle = (Bundle) state;
 			bundle.setClassLoader(loader);
@@ -380,7 +391,11 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				for (int i = 0; i < savedFragmentArray.length; i++) {
 					mSavedFragments.add((SavedFragment) savedFragmentArray[i]);
 				}
+				Log.i("NAME_TAG", "		--------> RESTORED_FRAGMENT NB : "+savedFragmentArray.length);
+			} else {
+				Log.i("NAME_TAG", "		--------> RESTORED_FRAGMENT NB : 0");
 			}
+
 
 			mBundle = bundle;
 			
@@ -388,7 +403,6 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			fragmentsNumb = mBundle.getInt("fragmentsNumb");
 			
 			for (int i = 0; i < nb; i++) {
-
 				fragment = FTFragment.instantiate(mContext, mBundle.getString("fragment-detached-path" + i), mBundle.getBundle("fragment-detached-bundle" + i), Animation.getAnimation(mBundle.getInt("fragment-detached-animIn" + i)), Animation.getAnimation(mBundle.getInt("fragment-detached-animOut" + i)));
 
 				if (fragment != null) {
@@ -396,11 +410,12 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 					fragment.setUserVisibleHint(false);
 					mDetachedFragments.add(fragment);
 					
-					mCurrentTransaction.remove(fragment);
 					mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(i + mSavedFragments.size()));
 					mCurrentTransaction.detach(fragment);
 				}
 			}
+			
+			Log.i("NAME_TAG", "		--------> RESTORED_DETACHED_FRAGMENT NB : "+nb);
 			
 			fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn", 0)), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut", 0)));
 			
@@ -412,18 +427,20 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				mCurrentTransaction.remove(mCurrentPrimaryItem);
 				mCurrentTransaction.add(mContainerId, mCurrentPrimaryItem, this.getFragmentName(fragmentsNumb));
 				mIsCurrentPrimaryItemDetatch = mBundle.getBoolean("primary-fragment-type");
+				
 				if (mIsCurrentPrimaryItemDetatch) {
 					mCurrentTransaction.detach(mCurrentPrimaryItem);
 				}
-				
+
+				Log.i("NAME_TAG", "		--------> RESTORED_CURRENT_FRAGMENT : YES");
 			} else {
-				Log.w(TAG, "Bad fragment at key " + "f");
+				Log.i("NAME_TAG", "		--------> RESTORED_CURRENT_FRAGMENT : NO");
 			}
 			
 			mBundle = null;
-			
-			
 		}
+		
+		Log.i("NAME_TAG_METHOD", "++++++++++++ BEGIN restoreState BEGIN ++++++++++++");
 	}
 
 	public static class SavedFragment implements Parcelable {

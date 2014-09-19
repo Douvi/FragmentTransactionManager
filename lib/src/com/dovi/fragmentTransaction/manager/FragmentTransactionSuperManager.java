@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.os.ParcelableCompat;
 import android.support.v4.os.ParcelableCompatCreatorCallbacks;
+import android.util.Log;
 import android.view.View.BaseSavedState;
 import android.view.ViewGroup;
 
@@ -33,7 +34,6 @@ public class FragmentTransactionSuperManager {
 	private int mCurrentRes;
 
 	private SavedStackState mStack;
-	private Boolean isRestoringState;
 	private FTFragment fragment;
 
 	private Parcelable[] mRestoredStackAdapter = null;
@@ -46,7 +46,16 @@ public class FragmentTransactionSuperManager {
 		mStackTags = new HashMap<String, FragmentTransactionAdapter>();
 		mRessouseTags = new HashMap<String, Integer>();
 		mDetachedNumTags = new HashMap<String, Integer>();
-		isRestoringState = false;
+	}
+	
+	public boolean isContainTag(String tag) {
+		
+		if (tag != null && tag.length() > 0) {
+			return mStackTags.containsKey(tag);
+		}
+		
+		return false; 
+		
 	}
 
 	public void createTag(String tag, int containerId, int detachFragmentLimited) {
@@ -57,6 +66,7 @@ public class FragmentTransactionSuperManager {
 		}
 
 		if (!mStackTags.containsKey(tag)) {
+			Log.i("--------> NAME_TAG", "TAG : "+tag+" | RES: "+containerId);
 			mStackTags.put(tag, new FragmentTransactionAdapter(mContext, mFragmentManager, tag, containerId, detachFragmentLimited));
 			mRessouseTags.put(tag, containerId);
 			mDetachedNumTags.put(tag, detachFragmentLimited);
@@ -242,17 +252,8 @@ public class FragmentTransactionSuperManager {
 		mFragmentManager = fm;
 
 		if (mStack != null) {
-			isRestoringState = true;
 			this.finishInitOnRestoreInstanceState();
 		}
-	}
-
-	public boolean isRestoringState() {
-		return isRestoringState;
-	}
-
-	public void setRestoringState(boolean state) {
-		isRestoringState = state;
 	}
 	
 	public String getCurrentStack(){
@@ -286,35 +287,33 @@ public class FragmentTransactionSuperManager {
 		mStack.currentTag = mCurrentTag;
 
 		mStack.stackTags = new String[mStackTags.size()];
-		int i = 0;
-		for (String key : mStackTags.keySet()) {
-			mStack.stackTags[i] = key;
-			i++;
-		}
-
 		mStack.stackAdapter = new Parcelable[mStackTags.size()];
-		i = 0;
-		for (FragmentTransactionAdapter adapter : mStackTags.values()) {
-			adapter.getCurrentTransaction();
-			mStack.stackAdapter[i] = adapter.saveState();
-			adapter.finishUpdate(mViewGroup);
-			i++;
+		mStack.stackRessourses = new int[mStackTags.size()];
+		mStack.stackDetached = new int[mStackTags.size()];
+		
+		Log.i("NAME_TAG_METHOD", "");
+		Log.i("NAME_TAG_METHOD", "*********** BEGIN onSaveInstanceState BEGIN ***********");
+		
+		int i = 0;
+		for(Entry<String, FragmentTransactionAdapter> entry : mStackTags.entrySet()) {
+		    String tag = entry.getKey();
+		    mCurrentAdapter = entry.getValue();
+		    mCurrentAdapter.getCurrentTransaction();
+			
+		    Log.i("NAME_TAG", "--------> TAG : "+tag+" | RES: "+mRessouseTags.get(tag));
+		    
+		    mStack.stackTags[i] = tag;
+		    mStack.stackAdapter[i] = mCurrentAdapter.saveState();
+		    mStack.stackRessourses[i] = mRessouseTags.get(tag);
+		    mStack.stackDetached[i] = mDetachedNumTags.get(tag);
+		    
+		    mCurrentAdapter.finishUpdate(mViewGroup);
+		    
+		    i++;
 		}
-
-		mStack.stackRessourses = new int[mRessouseTags.size()];
-		i = 0;
-		for (int res : mRessouseTags.values()) {
-			mStack.stackRessourses[i] = res;
-			i++;
-		}
-
-		mStack.stackDetached = new int[mDetachedNumTags.size()];
-		i = 0;
-		for (int nb : mDetachedNumTags.values()) {
-			mStack.stackDetached[i] = nb;
-			i++;
-		}
-
+		
+		Log.i("NAME_TAG_METHOD", "*********** END onSaveInstanceState END ***********");
+	
 		return mStack;
 	}
 
@@ -335,6 +334,7 @@ public class FragmentTransactionSuperManager {
 	}
 
 	public void finishInitOnRestoreInstanceState() {
+		Log.i("NAME_TAG_METHOD", "*********** BEGIN finishInitOnRestoreInstanceState BEGIN ***********");
 		int numDetach;
 		mCurrentTag = mStack.currentTag;
 		mRestoredStackAdapter = mStack.stackAdapter;
@@ -344,21 +344,25 @@ public class FragmentTransactionSuperManager {
 		mDetachedNumTags = new HashMap<String, Integer>();
 		
 		for (int i = 0; i < mStack.stackTags.length; i++) {
-
+			
 			mCurrentTag = mStack.stackTags[i];
 			mCurrentRes = mStack.stackRessourses[i];
 			numDetach = mStack.stackDetached[i];
 			
+			Log.i("--------> NAME_TAG", "TAG : "+mCurrentTag+" | RES: "+mCurrentRes);
+			
 			mRessouseTags.put(mCurrentTag, mCurrentRes);
 			mDetachedNumTags.put(mCurrentTag, numDetach);
-
+			
 			mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, mCurrentTag, mCurrentRes, numDetach);
 			mCurrentAdapter.getCurrentTransaction();
 			mCurrentAdapter.restoreState(mRestoredStackAdapter[i], SavedStackState.class.getClassLoader());
-			mStackTags.put(mCurrentTag, mCurrentAdapter);
 			mCurrentAdapter.finishUpdate(mViewGroup);
+			mStackTags.put(mCurrentTag, mCurrentAdapter);
+			
 		}
 
+		Log.i("NAME_TAG_METHOD", "*********** END finishInitOnRestoreInstanceState END***********");
 		mStack = null;
 	}
 

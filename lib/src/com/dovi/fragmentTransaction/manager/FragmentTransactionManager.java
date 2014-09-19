@@ -20,12 +20,8 @@ public class FragmentTransactionManager {
 		mFragmentsManager.setFragmentManager(fm);
 	}
 	
-	public boolean isNeededToRestoreState() {
-		return mFragmentsManager.isRestoringState();
-	}
-	
-	public void restoreState(){
-		mFragmentsManager.setRestoringState(false);
+	public boolean isContainTag(String tag) {
+		return mFragmentsManager.isContainTag(tag);
 	}
 	
 	public void createTag(String tag, int containerId, int detachFragmentLimited) {
