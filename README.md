@@ -119,21 +119,19 @@ Simple Exemple
         super.onResume();
 
         //Here you init FragmentTransactionManager
-        mFragmentTransactionBuilder = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
+        mFragmentTransactionManager = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
         
-        //You need to check if it don't need to finish to restore the state of your fragments. If not you can init your stacks
-        if (mFragmentTransactionBuilder.isNeededToRestoreState()) {
-            mFragmentTransactionBuilder.restoreState();
-        } else {
+        //To not re-init your stacks check if it contain it
+        if (!mFragmentTransactionManager.isContainTag("Menu")) {
             //Before add a fragment into a stack you need to init it
-            mFragmentTransactionBuilder.createTag("Menu", R.id.menuContent, 1);
-            mFragmentTransactionBuilder.createTag("ContentTab1", R.id.fragmentContent, 1);
+            mFragmentTransactionManager.createTag("Menu", R.id.menuContent, 1);
+            mFragmentTransactionManager.createTag("ContentTab1", R.id.fragmentContent, 1);
             
-            mFragmentTransactionBuilder.addFragmentInStack("Menu", FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
+            mFragmentTransactionManager.addFragmentInStack("Menu", FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
             
             Bundle mBundle = new Bundle();
             mBundle.putString("title", "Tab1");
-            mFragmentTransactionBuilder.addFragmentInStack("ContentTab1", FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
+            mFragmentTransactionManager.addFragmentInStack("ContentTab1", FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
         }
     }
 
