@@ -1,5 +1,6 @@
 package com.dovi.fragmentTransaction.manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -73,24 +74,24 @@ public class FragmentTransactionSuperManager {
 		}
 	}
 
-	public void addFragmentsInStacks(List<FragmentTransactionItem> list) {
-
-		if (list == null) {
-			throw new FragmentTransactionManagerException("the list must not be null");
-		}
-
-		for (FragmentTransactionItem fragmentTransactionItem : list) {
-
-			detachAllFragments(fragmentTransactionItem.tag);
-			getCurrentAdapter(fragmentTransactionItem.tag);
-
-			mCurrentAdapter.setTransactionAnimation(fragmentTransactionItem.fragment.mAnimIn);
-			mCurrentAdapter.add(mViewGroup, fragmentTransactionItem.fragment);
-			mStackTags.put(fragmentTransactionItem.tag, mCurrentAdapter);
-		}
-
-		mCurrentAdapter.finishUpdate(mViewGroup);
-	}
+//	public void addFragmentsInStacks(List<FragmentTransactionItem> list) {
+//
+//		if (list == null) {
+//			throw new FragmentTransactionManagerException("the list must not be null");
+//		}
+//
+//		for (FragmentTransactionItem fragmentTransactionItem : list) {
+//
+//			detachAllFragments(fragmentTransactionItem.tag);
+//			getCurrentAdapter(fragmentTransactionItem.tag);
+//
+//			mCurrentAdapter.setTransactionAnimation(fragmentTransactionItem.fragment.mAnimIn);
+//			mCurrentAdapter.add(mViewGroup, fragmentTransactionItem.fragment);
+//			mStackTags.put(fragmentTransactionItem.tag, mCurrentAdapter);
+//		}
+//
+//		mCurrentAdapter.finishUpdate(mViewGroup);
+//	}
 
 	public void addFragmentInStack(String tag, FTFragment fragment) {
 
@@ -194,6 +195,89 @@ public class FragmentTransactionSuperManager {
 			removeTopFragmentInStackWithAnimation(animation);
 		}
 
+	}
+	
+	public void returnToRootFragmentInStackWithAnimation(String tag, Boolean animation) {
+		
+		if (!mStackTags.containsKey(tag)) {
+			throw new FragmentTransactionManagerException("The tag : '" + tag
+					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
+		}
+		
+		if (!mCurrentTag.equals(tag)) {
+			mCurrentTag = tag;
+			mCurrentAdapter = mStackTags.get(tag);
+		}
+		
+		if (mCurrentAdapter.mSavedFragments.size() > 0 ) {
+			
+			SavedFragment mSavedFragment = mCurrentAdapter.mSavedFragments.get(0);
+			mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
+			mCurrentAdapter.mSavedFragments.add(mSavedFragment);
+			
+			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
+			mCurrentAdapter.fragmentsNumb = 1;
+			
+		} else if (mCurrentAdapter.mDetachedFragments.size() > 0) {
+			
+			FTFragment mFTFragment = mCurrentAdapter.mDetachedFragments.get(0);
+			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
+			mCurrentAdapter.mDetachedFragments.add(mFTFragment);
+			mCurrentAdapter.fragmentsNumb = 1;
+		}
+		
+		removeTopFragmentInStackWithAnimation(animation);
+	}
+	
+	public List<SavedFragment> getListOfFragmentsInStack(String tag) {
+	
+		if (!mStackTags.containsKey(tag)) {
+			throw new FragmentTransactionManagerException("The tag : '" + tag
+					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
+		}
+		
+		if (!mCurrentTag.equals(tag)) {
+			mCurrentTag = tag;
+			mCurrentAdapter = mStackTags.get(tag);
+		}
+		
+		List<SavedFragment> mFragments = new ArrayList<SavedFragment>();
+		
+		if (mCurrentAdapter.mSavedFragments.size() > 0) {
+			mFragments = new ArrayList<SavedFragment>(mCurrentAdapter.mSavedFragments);
+		}
+		
+		FTFragment mFTFragment;
+		
+		for (int i = 0; i < mCurrentAdapter.mDetachedFragments.size(); i++) {
+				
+			mFTFragment = mCurrentAdapter.mDetachedFragments.get(i);
+			mFragments.add(new SavedFragment(mFTFragment.getClass().getName(), mFTFragment.mExtraOutState, mFTFragment.mAnimIn.getAnimation(), mFTFragment.mAnimOut.getAnimation()));
+			
+		}
+		
+		if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached()) {
+			
+			mCurrentAdapter.mCurrentPrimaryItem.onSaveInstanceState(mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState);
+			mFragments.add(new SavedFragment(mCurrentAdapter.mCurrentPrimaryItem.getClass().getName(), mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState, mCurrentAdapter.mCurrentPrimaryItem.mAnimIn.getAnimation(), mCurrentAdapter.mCurrentPrimaryItem.mAnimOut.getAnimation()));
+			
+		}
+		
+		return mFragments;
+	}
+	
+	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments) {
+		
+		if (!mStackTags.containsKey(tag)) {
+			throw new FragmentTransactionManagerException("The tag : '" + tag
+					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
+		}
+		
+		if (!mCurrentTag.equals(tag)) {
+			mCurrentTag = tag;
+			mCurrentAdapter = mStackTags.get(tag);
+		}
+		
 	}
 
 	public void removeTopFragmentInStackWithAnimation(Boolean animation) {

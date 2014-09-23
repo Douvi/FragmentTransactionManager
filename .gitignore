@@ -9,3 +9,5 @@ ProjectTest/gen/
 
 SlidingMenu/bin/
 SlidingMenu/gen/
+
+*.class

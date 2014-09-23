@@ -6,9 +6,7 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
@@ -18,7 +16,6 @@ import android.view.ViewGroup;
 
 import com.dovi.fragmentTransaction.FTFragment;
 import com.dovi.fragmentTransaction.R;
-import com.dovi.fragmentTransaction.R.anim;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 
 public class FragmentTransactionAdapter extends SuperFragmentTransactionAdapter {
@@ -190,22 +187,18 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 	public Object instantiateItem(ViewGroup container, int position) {
 		fragment = null;
 
-		if (mSavedFragments.size() > position + 1) {
+		if (mSavedFragments.size() > position) {
 			mSavedFragment = mSavedFragments.get(position);
 			if (mSavedFragment != null) {
-				if ((mSavedFragment.mAnimIn == Animation.ANIM_RIGHT_TO_LEFT.getAnimation())
-						&& (mSavedFragment.mAnimOut == Animation.ANIM_LEFT_TO_RIGHT.getAnimation())) {
-
-				} else {
-					System.out.println();
-				}
-
-				fragment = (FTFragment) Fragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle);
-				fragment.mExtraOutState = mSavedFragment.mBundle;
-				fragment.mAnimIn = Animation.getAnimation(mSavedFragment.mAnimIn);
-				fragment.mAnimOut = Animation.getAnimation(mSavedFragment.mAnimOut);
-				fragment.setMenuVisibility(false);
-				fragment.setUserVisibleHint(false);
+				
+				fragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn), Animation.getAnimation(mSavedFragment.mAnimOut));
+				fragment.setMenuVisibility(true);
+				fragment.setUserVisibleHint(true);
+				
+				this.getCurrentTransaction();
+				mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(fragmentsNumb));
+				mCurrentTransaction.detach(fragment);
+				
 			}
 			mSavedFragments.remove(position);
 		} else {
@@ -218,17 +211,8 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				if (mSavedFragments.size() > 0) {
 					mSavedFragment = mSavedFragments.get(mSavedFragments.size() - 1);
 					if (mSavedFragment != null) {
-						if ((mSavedFragment.mAnimIn == Animation.ANIM_RIGHT_TO_LEFT.getAnimation())
-								&& (mSavedFragment.mAnimOut == Animation.ANIM_LEFT_TO_RIGHT.getAnimation())) {
-
-						} else {
-							System.out.println();
-						}
-
-						FTFragment fragmentTemp = (FTFragment) Fragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle);
-						fragmentTemp.mExtraOutState = mSavedFragment.mBundle;
-						fragmentTemp.mAnimIn = Animation.getAnimation(mSavedFragment.mAnimIn);
-						fragmentTemp.mAnimOut = Animation.getAnimation(mSavedFragment.mAnimOut);
+						
+						FTFragment fragmentTemp = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn), Animation.getAnimation(mSavedFragment.mAnimOut));
 						fragmentTemp.setMenuVisibility(false);
 						fragmentTemp.setUserVisibleHint(false);
 						mDetachedFragments.add(fragmentTemp);
@@ -381,7 +365,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			Bundle bundle = (Bundle) state;
 			bundle.setClassLoader(loader);
 
-			mSavedFragments = new ArrayList<SuperFragmentTransactionAdapter.SavedFragment>();
+			mSavedFragments = new ArrayList<SavedFragment>();
 			mDetachedFragments = new ArrayList<FTFragment>();
 			mCurrentPrimaryItem = null;
 			
@@ -441,51 +425,5 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 		}
 		
 		Log.i("NAME_TAG_METHOD", "++++++++++++ BEGIN restoreState BEGIN ++++++++++++");
-	}
-
-	public static class SavedFragment implements Parcelable {
-
-		public Bundle mBundle;
-		public int mAnimIn;
-		public int mAnimOut;
-		public String mPath;
-
-		public SavedFragment(String path, Bundle bundle, int animIn, int animOut) {
-			this.mBundle = bundle;
-			this.mAnimIn = animIn;
-			this.mAnimOut = animOut;
-			this.mPath = path;
-		}
-
-		public void writeToParcel(Parcel out, int flags) {
-			out.writeString(mPath);
-			out.writeBundle(mBundle);
-			out.writeInt(mAnimIn);
-			out.writeInt(mAnimOut);
-			System.out.println("");
-		}
-
-		public static final Parcelable.Creator<SavedFragment> CREATOR = new Parcelable.Creator<SavedFragment>() {
-			public SavedFragment createFromParcel(Parcel in) {
-				return new SavedFragment(in);
-			}
-
-			public SavedFragment[] newArray(int size) {
-				return new SavedFragment[size];
-			}
-		};
-
-		private SavedFragment(Parcel in) {
-			mPath = in.readString();
-			mBundle = in.readBundle();
-			mAnimIn = in.readInt();
-			mAnimOut = in.readInt();
-			System.out.println("");
-		}
-
-		@Override
-		public int describeContents() {
-			return 0;
-		}
 	}
 }

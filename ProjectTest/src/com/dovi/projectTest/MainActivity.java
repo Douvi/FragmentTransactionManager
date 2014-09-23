@@ -1,5 +1,7 @@
 package com.dovi.projectTest;
 
+import java.util.List;
+
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
@@ -11,6 +13,7 @@ import com.dovi.fragmentTransaction.OnSaveFragmentTransaction;
 import com.dovi.fragmentTransaction.layout.FTRelativeLayout;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionManager;
+import com.dovi.fragmentTransaction.manager.SavedFragment;
 import com.dovi.projectTest.fragments.MainContentFragment;
 import com.dovi.projectTest.fragments.MainMenuFragment;
 import com.example.projecttest.R;
@@ -90,10 +93,14 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			
 		} else if (currentStack.endsWith("ContentTab1") || currentStack.endsWith("ContentTab2") || currentStack.endsWith("ContentTab3")) {
 			
-			if (mFragmentTransactionManager.isStackEmpty()) {
+			if (mFragmentTransactionManager.isStackEmpty(currentStack)) {
 				super.onBackPressed();
 			}else {
-				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(true);
+//				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(currentStack, true);
+				
+				List<SavedFragment> mList = mFragmentTransactionManager.getListOfFragmentsInStack(currentStack);
+				
+				mFragmentTransactionManager.returnToRootFragmentInStackWithAnimation(currentStack, true);
 			}
 			
 		} else {

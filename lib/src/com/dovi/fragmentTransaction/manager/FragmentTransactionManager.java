@@ -2,11 +2,11 @@ package com.dovi.fragmentTransaction.manager;
 
 import java.util.List;
 
-import com.dovi.fragmentTransaction.FTFragment;
-
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.view.ViewGroup;
+
+import com.dovi.fragmentTransaction.FTFragment;
 
 public class FragmentTransactionManager {
 
@@ -26,10 +26,6 @@ public class FragmentTransactionManager {
 	
 	public void createTag(String tag, int containerId, int detachFragmentLimited) {
 		mFragmentsManager.createTag(tag, containerId, detachFragmentLimited);
-	}
-	
-	public void addFragmentsInStacks(List<FragmentTransactionItem> list) {
-		mFragmentsManager.addFragmentsInStacks(list);
 	}
 	
 	public void addFragmentInStack(String tag, FTFragment fragment) {
@@ -52,16 +48,16 @@ public class FragmentTransactionManager {
 		mFragmentsManager.removeTopFragmentInStackWithAnimation(tag, animation);
 	}
 	
-	public void removeTopFragmentInStackWithAnimation(Boolean animation) {
-		mFragmentsManager.removeTopFragmentInStackWithAnimation(animation);
+	public void returnToRootFragmentInStackWithAnimation(String tag, Boolean animation) {
+		mFragmentsManager.returnToRootFragmentInStackWithAnimation(tag, animation);
+	}
+	
+	public List<SavedFragment> getListOfFragmentsInStack(String tag){
+		return mFragmentsManager.getListOfFragmentsInStack(tag);
 	}
 	
 	public boolean isStackEmpty(String tag) {
 		return mFragmentsManager.isStackEmpty(tag);
-	}
-	
-	public boolean isStackEmpty() {
-		return mFragmentsManager.isStackEmpty();
 	}
 	
 	public String getCurrentStackName(){
