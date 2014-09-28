@@ -35,14 +35,14 @@ public class FTRelativeLayout extends RelativeLayout {
 		// TODO Auto-generated method stub
 		fragmentManger = mLister.onSaveInstanceState();
 		
-		return fragmentManger.mFragmentsManager.onSaveInstanceState(super.onSaveInstanceState());
+		return fragmentManger.mFMSuper.onSaveInstanceState(super.onSaveInstanceState());
 	}
 	
 	@Override
 	protected void onRestoreInstanceState(Parcelable state) {
 		// TODO Auto-generated method stub
 		fragmentManger = new FragmentTransactionManager(getContext(), null, null);
-		super.onRestoreInstanceState(fragmentManger.mFragmentsManager.onRestoreInstanceState(state));
+		super.onRestoreInstanceState(fragmentManger.mFMSuper.onRestoreInstanceState(state));
 	}
 	
 	public FragmentTransactionManager getFragmentManger(FragmentManager mFragmentManager, OnSaveFragmentTransaction lister) {

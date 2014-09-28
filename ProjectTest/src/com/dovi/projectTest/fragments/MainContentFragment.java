@@ -25,6 +25,12 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 	private int count;
 	private String tag;
 	private MainActivity mActivity;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,7 +87,7 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 		}
 
 //		outState.putAll(getArguments());
-//		outState.putString("clicked", click);
+		outState.putBoolean("saveState", true);
 
 		super.onSaveInstanceState(outState);
 	}

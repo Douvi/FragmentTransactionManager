@@ -240,7 +240,6 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 		while (mSavedFragments.size() <= position) {
 			mSavedFragments.add(null);
 		}
-		fragment.getView();
 
 		fragment.onSaveInstanceState(fragment.mExtraOutState);
 		mSavedFragments.set(position,
@@ -248,11 +247,9 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 	}
 
 	public void destroyItemWithOutSaving(ViewGroup container, int position, Object object) {
-		// fragment = (FSFragment) object;
 		getCurrentTransaction();
 		fragmentsNumb--;
 		mSavedFragments.remove(fragmentsNumb);
-		// fragment.getView();
 	}
 
 	@Override
@@ -307,8 +304,6 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 
 	@Override
 	public Parcelable saveState() {
-		Log.i("NAME_TAG_METHOD", "");
-		Log.i("NAME_TAG_METHOD", "		++++++++++++ BEGIN saveState BEGIN ++++++++++++");
 		Bundle state = null;
 		if (mSavedFragments.size() > 0) {
 			state = new Bundle();
@@ -316,8 +311,6 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			mSavedFragments.toArray(savedFragmentArray);
 			state.putParcelableArray("fragments", savedFragmentArray);
 		} 
-		
-		Log.i("NAME_TAG", "		--------> SAVED_FRAGMENT NB : "+mSavedFragments.size());
 
 		if (state == null) {
 			state = new Bundle();

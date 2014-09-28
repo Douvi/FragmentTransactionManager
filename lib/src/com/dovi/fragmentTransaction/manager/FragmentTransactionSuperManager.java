@@ -26,7 +26,7 @@ public class FragmentTransactionSuperManager {
 	private FragmentManager mFragmentManager;
 
 	private HashMap<String, FragmentTransactionAdapter> mStackTags;
-	private HashMap<String, Integer> mRessouseTags;
+	private HashMap<String, Integer> mResouceTags;
 	private HashMap<String, Integer> mDetachedNumTags;
 
 	private FragmentTransactionAdapter mCurrentAdapter;
@@ -44,243 +44,165 @@ public class FragmentTransactionSuperManager {
 		mContext = context;
 		mFragmentManager = fm;
 		mCurrentTag = null;
+		mCurrentRes = 0;
 		mStackTags = new HashMap<String, FragmentTransactionAdapter>();
-		mRessouseTags = new HashMap<String, Integer>();
+		mResouceTags = new HashMap<String, Integer>();
 		mDetachedNumTags = new HashMap<String, Integer>();
 	}
 	
+	public void setFragmentManager(FragmentManager fm) {
+		mFragmentManager = fm;
+
+		if (mStack != null) {
+			this.finishInitOnRestoreInstanceState();
+		}
+	}
+
 	public boolean isContainTag(String tag) {
-		
+
 		if (tag != null && tag.length() > 0) {
 			return mStackTags.containsKey(tag);
 		}
-		
-		return false; 
-		
+
+		return false;
 	}
 
 	public void createTag(String tag, int containerId, int detachFragmentLimited) {
 
-		if (containerId <= 0) {
-			throw new FragmentTransactionManagerException(
-					"The containerId must be init with a ressource id - Here an exemple of what you should do :createTag(\"TagName\", R.layout.your_content)");
-		}
-
+		isContainerIdOK(containerId);
+		isTagIsOK(tag, false);
+		
 		if (!mStackTags.containsKey(tag)) {
-			Log.i("--------> NAME_TAG", "TAG : "+tag+" | RES: "+containerId);
 			mStackTags.put(tag, new FragmentTransactionAdapter(mContext, mFragmentManager, tag, containerId, detachFragmentLimited));
-			mRessouseTags.put(tag, containerId);
+			mResouceTags.put(tag, containerId);
 			mDetachedNumTags.put(tag, detachFragmentLimited);
 		}
 	}
 
-//	public void addFragmentsInStacks(List<FragmentTransactionItem> list) {
-//
-//		if (list == null) {
-//			throw new FragmentTransactionManagerException("the list must not be null");
-//		}
-//
-//		for (FragmentTransactionItem fragmentTransactionItem : list) {
-//
-//			detachAllFragments(fragmentTransactionItem.tag);
-//			getCurrentAdapter(fragmentTransactionItem.tag);
-//
-//			mCurrentAdapter.setTransactionAnimation(fragmentTransactionItem.fragment.mAnimIn);
-//			mCurrentAdapter.add(mViewGroup, fragmentTransactionItem.fragment);
-//			mStackTags.put(fragmentTransactionItem.tag, mCurrentAdapter);
-//		}
-//
-//		mCurrentAdapter.finishUpdate(mViewGroup);
-//	}
-
 	public void addFragmentInStack(String tag, FTFragment fragment) {
 
-		if (fragment == null) {
-			throw new FragmentTransactionManagerException("the fragment must not be null  - Here an exemple of what you should do :");
-		}
+		isFragmentIsOK(fragment);
+		isTagIsOK(tag);
 
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
-
-		detachAllFragments(tag);
 		getCurrentAdapter(tag);
-
+		detachAllFragments(tag);
+	
 		mCurrentAdapter.setTransactionAnimation(fragment.mAnimIn);
 		mCurrentAdapter.add(mViewGroup, fragment);
 
 		mCurrentAdapter.finishUpdate(mViewGroup);
 		mStackTags.put(tag, mCurrentAdapter);
 	}
-	
+
 	public void addFragmentAsRootInStack(String tag, FTFragment fragment) {
 
-		if (fragment == null) {
-			throw new FragmentTransactionManagerException("the fragment must not be null  - Here an exemple of what you should do :");
-		}
+		isFragmentIsOK(fragment);
+		isTagIsOK(tag);
 
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
-
-		mCurrentAdapter = mStackTags.get(tag);
+		getCurrentAdapter(tag);
+		
 		mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, tag, mCurrentAdapter.mContainerId, mCurrentAdapter.mDetachFragmentLimited);
 		mStackTags.remove(tag);
 		mStackTags.put(tag, mCurrentAdapter);
-		
+
 		addFragmentInStack(tag, fragment);
 	}
 
 	public void showTopFragmentInStack(String tag) {
 
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
+		isTagIsOK(tag);
 
-		detachAllFragments(tag);
 		getCurrentAdapter(tag);
-
+		detachAllFragments(tag);
+		
 		mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
 		mCurrentAdapter.finishUpdate(mViewGroup);
 		mStackTags.put(tag, mCurrentAdapter);
 
 	}
 
-	private void getCurrentAdapter(String tag) {
-		mCurrentAdapter = mStackTags.get(tag);
-		mCurrentTag = tag;
-		mCurrentRes = mCurrentAdapter.getContainerId();
-	}
-
-	private void detachAllFragments(String tag) {
-		if (mCurrentTag != null) {
-
-			int idRess = mRessouseTags.get(tag);
-
-			Iterator<Entry<String, Integer>> it = mRessouseTags.entrySet().iterator();
-			while (it.hasNext()) {
-				Entry<String, Integer> pairs = it.next();
-
-				if (tag != pairs.getKey() && idRess == pairs.getValue()) {
-
-					mCurrentAdapter = mStackTags.get(pairs.getKey());
-
-					if (!mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
-						mCurrentAdapter.detach(mCurrentAdapter.mCurrentPrimaryItem);
-						mCurrentAdapter.finishUpdate(mViewGroup);
-						mStackTags.put(pairs.getKey(), mCurrentAdapter);
-					}
-				}
-			}
-		}
-	}
-
 	public void removeTopFragmentInStackWithAnimation(String tag, Boolean animation) {
 
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
+		isTagIsOK(tag);
+		
+		getCurrentAdapter(tag);
+		
+		removeTopFragmentInStackWithAnimation(animation);
+		
+	}
 
-		if (!mCurrentTag.equals(tag)) {
-			mCurrentTag = tag;
-
-			mCurrentAdapter = mStackTags.get(tag);
-			removeTopFragmentInStackWithAnimation(animation);
-
-		} else {
-			removeTopFragmentInStackWithAnimation(animation);
-		}
+	public void returnToFragmentAtPositionInStackWithAnimation(String tag, int position, Boolean animation) {
 
 	}
-	
+
 	public void returnToRootFragmentInStackWithAnimation(String tag, Boolean animation) {
-		
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
-		
-		if (!mCurrentTag.equals(tag)) {
-			mCurrentTag = tag;
-			mCurrentAdapter = mStackTags.get(tag);
-		}
-		
-		if (mCurrentAdapter.mSavedFragments.size() > 0 ) {
-			
+
+		isTagIsOK(tag);
+
+		getCurrentAdapter(tag);
+
+		if (mCurrentAdapter.mSavedFragments.size() > 0) {
+
 			SavedFragment mSavedFragment = mCurrentAdapter.mSavedFragments.get(0);
 			mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
 			mCurrentAdapter.mSavedFragments.add(mSavedFragment);
-			
+
 			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
 			mCurrentAdapter.fragmentsNumb = 1;
-			
+
 		} else if (mCurrentAdapter.mDetachedFragments.size() > 0) {
-			
+
 			FTFragment mFTFragment = mCurrentAdapter.mDetachedFragments.get(0);
 			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
 			mCurrentAdapter.mDetachedFragments.add(mFTFragment);
 			mCurrentAdapter.fragmentsNumb = 1;
 		}
-		
+
 		removeTopFragmentInStackWithAnimation(animation);
 	}
-	
+
 	public List<SavedFragment> getListOfFragmentsInStack(String tag) {
-	
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
-		
-		if (!mCurrentTag.equals(tag)) {
-			mCurrentTag = tag;
-			mCurrentAdapter = mStackTags.get(tag);
-		}
-		
+
+		isTagIsOK(tag);
+
+		getCurrentAdapter(tag);
+
 		List<SavedFragment> mFragments = new ArrayList<SavedFragment>();
-		
+
 		if (mCurrentAdapter.mSavedFragments.size() > 0) {
 			mFragments = new ArrayList<SavedFragment>(mCurrentAdapter.mSavedFragments);
 		}
-		
+
 		FTFragment mFTFragment;
-		
+
 		for (int i = 0; i < mCurrentAdapter.mDetachedFragments.size(); i++) {
-				
+
 			mFTFragment = mCurrentAdapter.mDetachedFragments.get(i);
-			mFragments.add(new SavedFragment(mFTFragment.getClass().getName(), mFTFragment.mExtraOutState, mFTFragment.mAnimIn.getAnimation(), mFTFragment.mAnimOut.getAnimation()));
-			
+			mFragments.add(new SavedFragment(mFTFragment.getClass().getName(), mFTFragment.mExtraOutState, mFTFragment.mAnimIn.getAnimation(),
+					mFTFragment.mAnimOut.getAnimation()));
+
 		}
-		
+
 		if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached()) {
-			
+
 			mCurrentAdapter.mCurrentPrimaryItem.onSaveInstanceState(mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState);
-			mFragments.add(new SavedFragment(mCurrentAdapter.mCurrentPrimaryItem.getClass().getName(), mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState, mCurrentAdapter.mCurrentPrimaryItem.mAnimIn.getAnimation(), mCurrentAdapter.mCurrentPrimaryItem.mAnimOut.getAnimation()));
-			
+			mFragments.add(new SavedFragment(mCurrentAdapter.mCurrentPrimaryItem.getClass().getName(), mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState,
+					mCurrentAdapter.mCurrentPrimaryItem.mAnimIn.getAnimation(), mCurrentAdapter.mCurrentPrimaryItem.mAnimOut.getAnimation()));
+
 		}
-		
+
 		return mFragments;
 	}
-	
+
 	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments) {
-		
-		if (!mStackTags.containsKey(tag)) {
-			throw new FragmentTransactionManagerException("The tag : '" + tag
-					+ "' must be init before add it a Fragment - Here an exemple of what you should do : 'createTag(String tag, int ressource)' ");
-		}
-		
-		if (!mCurrentTag.equals(tag)) {
-			mCurrentTag = tag;
-			mCurrentAdapter = mStackTags.get(tag);
-		}
-		
+
+		isTagIsOK(tag);
+
+		getCurrentAdapter(tag);
+
 	}
 
-	public void removeTopFragmentInStackWithAnimation(Boolean animation) {
+	private void removeTopFragmentInStackWithAnimation(Boolean animation) {
 
 		if (!isStackEmpty()) {
 
@@ -302,29 +224,26 @@ public class FragmentTransactionSuperManager {
 	}
 
 	public boolean isStackEmpty(String tag) {
-		if (!mCurrentTag.equals(tag)) {
-			mCurrentTag = tag;
+		
+		isTagIsOK(tag);
 
-			if (mStackTags.containsKey(tag)) {
-				mCurrentAdapter = mStackTags.get(tag);
-				return isStackEmpty();
-			} else {
-				return true;
-			}
-		} else {
-			return isStackEmpty();
-		}
+		getCurrentAdapter(tag);
+		
+		return isStackEmpty();
 	}
 
-	public boolean isStackEmpty() {
+	private boolean isStackEmpty() {
+		
 		if (mCurrentAdapter != null) {
-			return (mCurrentAdapter.getCount() -1) <= 0;
+			return (mCurrentAdapter.getCount() - 1) <= 0;
 		}
 		return true;
 	}
 
 	public int getCountOfFragmentsInStack(String tag) {
-
+		
+		isTagIsOK(tag);
+		
 		if (mStackTags.containsKey(tag)) {
 			return mStackTags.get(tag).getCount();
 		} else {
@@ -332,36 +251,24 @@ public class FragmentTransactionSuperManager {
 		}
 	}
 
-	public void setFragmentManager(FragmentManager fm) {
-		mFragmentManager = fm;
+	public String getCurrentStackNameFromContent(int resourceId) {
 
-		if (mStack != null) {
-			this.finishInitOnRestoreInstanceState();
-		}
-	}
-	
-	public String getCurrentStack(){
-		return mCurrentTag;
-	}
-	
-	public String getCurrentStackNameFromContent(int ressourceId) {
-		
-		if (mRessouseTags.get(mCurrentTag) == ressourceId && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+		if (mResouceTags.get(mCurrentTag) == resourceId && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
 			return mCurrentTag;
 		} else {
-			
-			for (String tag : mRessouseTags.keySet()) {
-				
-				if (mRessouseTags.get(tag) == ressourceId) {
-					
+
+			for (String tag : mResouceTags.keySet()) {
+
+				if (mResouceTags.get(tag) == resourceId) {
+
 					getCurrentAdapter(tag);
 					if (!mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
 						return mCurrentTag;
 					}
 				}
 			}
-			
-			return "";
+
+			return null;
 		}
 	}
 
@@ -372,39 +279,31 @@ public class FragmentTransactionSuperManager {
 
 		mStack.stackTags = new String[mStackTags.size()];
 		mStack.stackAdapter = new Parcelable[mStackTags.size()];
-		mStack.stackRessourses = new int[mStackTags.size()];
+		mStack.stackResources = new int[mStackTags.size()];
 		mStack.stackDetached = new int[mStackTags.size()];
-		
-		Log.i("NAME_TAG_METHOD", "");
-		Log.i("NAME_TAG_METHOD", "*********** BEGIN onSaveInstanceState BEGIN ***********");
-		
+
 		int i = 0;
-		for(Entry<String, FragmentTransactionAdapter> entry : mStackTags.entrySet()) {
-		    String tag = entry.getKey();
-		    mCurrentAdapter = entry.getValue();
-		    mCurrentAdapter.getCurrentTransaction();
-			
-		    Log.i("NAME_TAG", "--------> TAG : "+tag+" | RES: "+mRessouseTags.get(tag));
-		    
-		    mStack.stackTags[i] = tag;
-		    mStack.stackAdapter[i] = mCurrentAdapter.saveState();
-		    mStack.stackRessourses[i] = mRessouseTags.get(tag);
-		    mStack.stackDetached[i] = mDetachedNumTags.get(tag);
-		    
-		    mCurrentAdapter.finishUpdate(mViewGroup);
-		    
-		    i++;
+		for (Entry<String, FragmentTransactionAdapter> entry : mStackTags.entrySet()) {
+			String tag = entry.getKey();
+			mCurrentAdapter = entry.getValue();
+			mCurrentAdapter.getCurrentTransaction();
+
+			mStack.stackTags[i] = tag;
+			mStack.stackAdapter[i] = mCurrentAdapter.saveState();
+			mStack.stackResources[i] = mResouceTags.get(tag);
+			mStack.stackDetached[i] = mDetachedNumTags.get(tag);
+
+			mCurrentAdapter.finishUpdate(mViewGroup);
+
+			i++;
 		}
-		
-		Log.i("NAME_TAG_METHOD", "*********** END onSaveInstanceState END ***********");
-	
+
 		return mStack;
 	}
 
 	public Parcelable onRestoreInstanceState(Parcelable state) {
 
 		if (!(state instanceof SavedStackState)) {
-			// super.onRestoreInstanceState(state);
 			return state;
 		}
 
@@ -418,42 +317,99 @@ public class FragmentTransactionSuperManager {
 	}
 
 	public void finishInitOnRestoreInstanceState() {
-		Log.i("NAME_TAG_METHOD", "*********** BEGIN finishInitOnRestoreInstanceState BEGIN ***********");
 		int numDetach;
 		mCurrentTag = mStack.currentTag;
 		mRestoredStackAdapter = mStack.stackAdapter;
 
 		mStackTags = new HashMap<String, FragmentTransactionAdapter>();
-		mRessouseTags = new HashMap<String, Integer>();
+		mResouceTags = new HashMap<String, Integer>();
 		mDetachedNumTags = new HashMap<String, Integer>();
-		
+
 		for (int i = 0; i < mStack.stackTags.length; i++) {
-			
+
 			mCurrentTag = mStack.stackTags[i];
-			mCurrentRes = mStack.stackRessourses[i];
+			mCurrentRes = mStack.stackResources[i];
 			numDetach = mStack.stackDetached[i];
-			
-			Log.i("--------> NAME_TAG", "TAG : "+mCurrentTag+" | RES: "+mCurrentRes);
-			
-			mRessouseTags.put(mCurrentTag, mCurrentRes);
+
+			mResouceTags.put(mCurrentTag, mCurrentRes);
 			mDetachedNumTags.put(mCurrentTag, numDetach);
-			
+
 			mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, mCurrentTag, mCurrentRes, numDetach);
 			mCurrentAdapter.getCurrentTransaction();
 			mCurrentAdapter.restoreState(mRestoredStackAdapter[i], SavedStackState.class.getClassLoader());
 			mCurrentAdapter.finishUpdate(mViewGroup);
 			mStackTags.put(mCurrentTag, mCurrentAdapter);
-			
+
 		}
 
-		Log.i("NAME_TAG_METHOD", "*********** END finishInitOnRestoreInstanceState END***********");
 		mStack = null;
+	}
+	
+	private void isContainerIdOK(int containerId) {
+		if (containerId <= 0) {
+			throw new FragmentTransactionManagerException("The containerId if must be init with a resource id");
+		}
+	}
+	
+	private void isTagIsOK(String tag) {
+		this.isTagIsOK(tag, true);
+	}
+	
+	private void isTagIsOK(String tag, boolean isOnList) {
+		if (tag == null || tag.length() <= 0) {
+			throw new FragmentTransactionManagerException("The tag must not be set to null or empty.");
+		}
+		
+		if (isOnList) {
+			if (!mStackTags.containsKey(tag)) {
+				throw new FragmentTransactionManagerException("The tag : '" + tag + "' must be init before into FragmentTrasactionManager");
+			}
+		}	
+	}
+	
+	private void isFragmentIsOK(FTFragment fragment){
+		
+		if (fragment == null) {
+			throw new FragmentTransactionManagerException("the fragment must not be null");
+		}
+		
+	}
+		
+	private void getCurrentAdapter(String tag) {
+		if (mCurrentTag == null || !mCurrentTag.equals(tag)) {
+			mCurrentAdapter = mStackTags.get(tag);
+			mCurrentTag = tag;
+			mCurrentRes = mCurrentAdapter.getContainerId();
+		}
+	}
+
+	private void detachAllFragments(String tag) {
+		if (mCurrentTag != null) {
+
+			int idRess = mResouceTags.get(tag);
+
+			Iterator<Entry<String, Integer>> it = mResouceTags.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry<String, Integer> pairs = it.next();
+
+				if (tag != pairs.getKey() && idRess == pairs.getValue()) {
+
+					mCurrentAdapter = mStackTags.get(pairs.getKey());
+
+					if (!mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+						mCurrentAdapter.detach(mCurrentAdapter.mCurrentPrimaryItem);
+						mCurrentAdapter.finishUpdate(mViewGroup);
+						mStackTags.put(pairs.getKey(), mCurrentAdapter);
+					}
+				}
+			}
+		}
 	}
 
 	public static class SavedStackState extends BaseSavedState {
 		Parcelable[] stackAdapter;
 		String[] stackTags;
-		int[] stackRessourses;
+		int[] stackResources;
 		int[] stackDetached;
 		String currentTag;
 
@@ -468,8 +424,8 @@ public class FragmentTransactionSuperManager {
 			out.writeParcelableArray(stackAdapter, flags);
 			out.writeInt(stackTags.length);
 			out.writeStringArray(stackTags);
-			out.writeInt(stackRessourses.length);
-			out.writeIntArray(stackRessourses);
+			out.writeInt(stackResources.length);
+			out.writeIntArray(stackResources);
 			out.writeInt(stackDetached.length);
 			out.writeIntArray(stackDetached);
 		}
@@ -496,8 +452,8 @@ public class FragmentTransactionSuperManager {
 			this.stackAdapter = in.readParcelableArray(loader);
 			this.stackTags = new String[in.readInt()];
 			in.readStringArray(this.stackTags);
-			this.stackRessourses = new int[in.readInt()];
-			in.readIntArray(stackRessourses);
+			this.stackResources = new int[in.readInt()];
+			in.readIntArray(stackResources);
 			this.stackDetached = new int[in.readInt()];
 			in.readIntArray(stackDetached);
 		}

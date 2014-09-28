@@ -96,11 +96,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 			if (mFragmentTransactionManager.isStackEmpty(currentStack)) {
 				super.onBackPressed();
 			}else {
-//				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(currentStack, true);
+				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(currentStack, true);
 				
-				List<SavedFragment> mList = mFragmentTransactionManager.getListOfFragmentsInStack(currentStack);
-				
-				mFragmentTransactionManager.returnToRootFragmentInStackWithAnimation(currentStack, true);
+//				List<SavedFragment> mList = mFragmentTransactionManager.getListOfFragmentsInStack(currentStack);
+//				
+//				mFragmentTransactionManager.returnToRootFragmentInStackWithAnimation(currentStack, true);
 			}
 			
 		} else {
