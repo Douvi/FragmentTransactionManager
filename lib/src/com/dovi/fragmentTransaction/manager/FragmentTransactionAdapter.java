@@ -134,7 +134,7 @@ public class FragmentTransactionAdapter extends SuperFragmentTransactionAdapter 
 
 	@Override
 	public int getCount() {
-		return fragmentsNumb + 1;
+		return fragmentsNumb;
 	}
 
 	public int getContainerId() {

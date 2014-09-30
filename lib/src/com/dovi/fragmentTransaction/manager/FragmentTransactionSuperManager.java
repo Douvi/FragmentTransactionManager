@@ -134,6 +134,35 @@ public class FragmentTransactionSuperManager {
 
 	public void returnToFragmentAtPositionInStackWithAnimation(String tag, int position, Boolean animation) {
 
+		isTagIsOK(tag);
+
+		getCurrentAdapter(tag);
+		
+		position = position < 0 ? 0 : position; 
+		
+		if (position >= 0 && position <= mCurrentAdapter.getCount()) {
+			mCurrentAdapter.removed(mCurrentAdapter.mCurrentPrimaryItem);
+			
+			fragment = null;
+			while (mCurrentAdapter.getCount() > position && mCurrentAdapter.getCount() > 0) {
+				
+				if (fragment != null) {
+					mCurrentAdapter.removed(fragment);
+				}
+				
+				fragment = (FTFragment) mCurrentAdapter.instantiateItem(mViewGroup, mCurrentAdapter.getCount());
+				
+			}
+			
+			if (fragment != null) {
+				mCurrentAdapter.setPrimaryItem(mViewGroup, mCurrentAdapter.getCount(), fragment);
+
+				mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
+			}
+			
+			mCurrentAdapter.finishUpdate(mViewGroup);
+			mStackTags.put(mCurrentTag, mCurrentAdapter);
+		}
 	}
 
 	public void returnToRootFragmentInStackWithAnimation(String tag, Boolean animation) {
@@ -281,9 +310,9 @@ public class FragmentTransactionSuperManager {
 			}
 
 			mCurrentAdapter.removed(mCurrentAdapter.mCurrentPrimaryItem);
-			fragment = (FTFragment) mCurrentAdapter.instantiateItem(mViewGroup, mCurrentAdapter.getCount() - 1);
+			fragment = (FTFragment) mCurrentAdapter.instantiateItem(mViewGroup, mCurrentAdapter.getCount());
 
-			mCurrentAdapter.setPrimaryItem(mViewGroup, mCurrentAdapter.getCount() - 1, fragment);
+			mCurrentAdapter.setPrimaryItem(mViewGroup, mCurrentAdapter.getCount(), fragment);
 
 			mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
 			mCurrentAdapter.finishUpdate(mViewGroup);
@@ -305,7 +334,7 @@ public class FragmentTransactionSuperManager {
 	private boolean isStackEmpty() {
 
 		if (mCurrentAdapter != null) {
-			return (mCurrentAdapter.getCount() - 1) <= 0;
+			return (mCurrentAdapter.getCount()) <= 0;
 		}
 		return true;
 	}
@@ -313,7 +342,7 @@ public class FragmentTransactionSuperManager {
 	public int getCountOfFragmentsInStack(String tag) {
 
 		if (tag != null && tag.length() > 0 && mStackTags.containsKey(tag)) {
-			return mStackTags.get(tag).getCount();
+			return mStackTags.get(tag).getCount() + 1;
 		} else {
 			return 0;
 		}

@@ -3,7 +3,9 @@ package com.dovi.fragmentTransaction.manager;
 import java.util.List;
 
 import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.ViewGroup;
 
 import com.dovi.fragmentTransaction.FTFragment;
@@ -12,6 +14,9 @@ import com.dovi.fragmentTransaction.layout.FTRelativeLayout;
 
 public class FragmentTransactionManager {
 
+	private static Fragment FRAGMENT;
+	private static FragmentTransaction TRANSACTION;
+	
 	public FragmentTransactionSuperManager mFMSuper = null;
 	
 	/**
@@ -254,5 +259,25 @@ public class FragmentTransactionManager {
 	 */
 	public String getCurrentStackNameFromContent(int resourceId) {
 		return mFMSuper.getCurrentStackNameFromContent(resourceId);
+	}
+	
+	/**
+	 * Use this method to remove a specific resource.
+	 * This should be use for specific case like MapView. 
+	 * You can not have 2 MapViews saved into the FargemtnTrasaction.
+	 * 
+	 * @param fragmentManager
+	 * @param ressourceId
+	 */
+	public static void removeRessourceFromFragmentManager(FragmentManager fragmentManager, int ressourceId) {
+		if (fragmentManager != null) {
+			FRAGMENT = fragmentManager.findFragmentById(ressourceId);
+			
+			if (FRAGMENT != null) {
+				TRANSACTION = fragmentManager.beginTransaction();
+				TRANSACTION.remove(FRAGMENT);
+				TRANSACTION.commitAllowingStateLoss();
+			}
+		}
 	}
 }
