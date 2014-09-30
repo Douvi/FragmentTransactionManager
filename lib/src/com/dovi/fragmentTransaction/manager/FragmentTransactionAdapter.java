@@ -215,15 +215,14 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 						FTFragment fragmentTemp = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn), Animation.getAnimation(mSavedFragment.mAnimOut));
 						fragmentTemp.setMenuVisibility(false);
 						fragmentTemp.setUserVisibleHint(false);
-						mDetachedFragments.add(fragmentTemp);
-
+						
 						this.getCurrentTransaction();
 						mCurrentTransaction.add(mContainerId, fragmentTemp, this.getFragmentName(fragmentsNumb));
 						mCurrentTransaction.detach(fragmentTemp);
+						mDetachedFragments.add(fragmentTemp);
 					}
 					mSavedFragments.remove(mSavedFragments.size() - 1);
 				}
-
 			}
 		}
 
@@ -330,8 +329,6 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				mCurrentTransaction.remove(fragment);
 			}
 		}
-		
-		Log.i("NAME_TAG", "		--------> SAVED_DETACHED_FRAGMENT NB : "+mDetachedFragments.size());
 
 		if (mCurrentPrimaryItem != null) {
 			mCurrentPrimaryItem.onSaveInstanceState(mCurrentPrimaryItem.mExtraOutState);
@@ -340,20 +337,14 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			state.putInt("primary-fragment-animOut", mCurrentPrimaryItem.mAnimOut.getAnimation());
 			state.putString("primary-fragment-path", mCurrentPrimaryItem.getClass().getName());
 			state.putBoolean("primary-fragment-type", mCurrentPrimaryItem.isDetached());
-			
-			Log.i("NAME_TAG", "		--------> SAVED_CURRENT_FRAGMENT : YES");
-		} else {
-			Log.i("NAME_TAG", "		--------> SAVED_CURRENT_FRAGMENT : NO");
-		}
+		} 
 		
-		Log.i("NAME_TAG_METHOD", "		++++++++++++ END saveState END ++++++++++++");
 		return state;
 	}
 
 	@Override
 	public void restoreState(Parcelable state, ClassLoader loader) {
-		Log.i("NAME_TAG_METHOD", "++++++++++++ BEGIN restoreState BEGIN ++++++++++++");
-		
+	
 		if (state != null) {
 			Bundle bundle = (Bundle) state;
 			bundle.setClassLoader(loader);
@@ -368,11 +359,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				for (int i = 0; i < savedFragmentArray.length; i++) {
 					mSavedFragments.add((SavedFragment) savedFragmentArray[i]);
 				}
-				Log.i("NAME_TAG", "		--------> RESTORED_FRAGMENT NB : "+savedFragmentArray.length);
-			} else {
-				Log.i("NAME_TAG", "		--------> RESTORED_FRAGMENT NB : 0");
-			}
-
+			} 
 
 			mBundle = bundle;
 			
@@ -392,8 +379,6 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				}
 			}
 			
-			Log.i("NAME_TAG", "		--------> RESTORED_DETACHED_FRAGMENT NB : "+nb);
-			
 			fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn", 0)), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut", 0)));
 			
 			if (fragment != null) {
@@ -408,15 +393,10 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				if (mIsCurrentPrimaryItemDetatch) {
 					mCurrentTransaction.detach(mCurrentPrimaryItem);
 				}
-
-				Log.i("NAME_TAG", "		--------> RESTORED_CURRENT_FRAGMENT : YES");
-			} else {
-				Log.i("NAME_TAG", "		--------> RESTORED_CURRENT_FRAGMENT : NO");
-			}
+				
+			} 
 			
 			mBundle = null;
 		}
-		
-		Log.i("NAME_TAG_METHOD", "++++++++++++ BEGIN restoreState BEGIN ++++++++++++");
 	}
 }

@@ -87,7 +87,7 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 		}
 
 //		outState.putAll(getArguments());
-		outState.putBoolean("saveState", true);
+//		outState.putBoolean("saveState", true);
 
 		super.onSaveInstanceState(outState);
 	}
