@@ -195,7 +195,7 @@ public class FragmentTransactionSuperManager {
 		return mFragments;
 	}
 
-	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments) {
+	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments, boolean replacePrimaryFragmentIsDetach) {
 
 		isTagIsOK(tag);
 
@@ -203,12 +203,14 @@ public class FragmentTransactionSuperManager {
 
 		mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
 		mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
-
+		
 		FTFragment mFragment = null;
 		SavedFragment mSavedFragment = null;
 
-		if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached()) {
+		if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached() && replacePrimaryFragmentIsDetach) {
 
+			mCurrentAdapter.fragmentsNumb = fragments.size();
+			
 			for (int i = 0; i < fragments.size(); i++) {
 
 				if (i == fragments.size() - 1) {
@@ -221,10 +223,12 @@ public class FragmentTransactionSuperManager {
 
 					mCurrentAdapter.getCurrentTransaction();
 					mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
-					mCurrentAdapter.setPrimaryItem(mViewGroup, i, mFragment);
+					mCurrentAdapter.mCurrentTransaction.detach(mFragment);
+					mCurrentAdapter.mCurrentPrimaryItem = mFragment;
+					mCurrentAdapter.mIsCurrentPrimaryItemDetatch = true;
 					mCurrentAdapter.finishUpdate(mViewGroup);
 
-				} else if (i >= (i - mCurrentAdapter.mDetachFragmentLimited)) {
+				} else if (i >= ((fragments.size() - mCurrentAdapter.mDetachFragmentLimited) - 1)) {
 					mSavedFragment = fragments.get(i);
 					mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn),
 							Animation.getAnimation(mSavedFragment.mAnimOut));
@@ -235,6 +239,7 @@ public class FragmentTransactionSuperManager {
 					mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
 					mCurrentAdapter.mCurrentTransaction.detach(mFragment);
 					mCurrentAdapter.finishUpdate(mViewGroup);
+					mCurrentAdapter.mDetachedFragments.add(mFragment);
 
 				} else {
 					mCurrentAdapter.mSavedFragments.add(fragments.get(i));
@@ -243,9 +248,11 @@ public class FragmentTransactionSuperManager {
 
 		} else {
 
+			mCurrentAdapter.fragmentsNumb = fragments.size();
+			
 			for (int i = 0; i < fragments.size(); i++) {
 
-				if (i >= (i - mCurrentAdapter.mDetachFragmentLimited)) {
+				if (i >= (fragments.size() - mCurrentAdapter.mDetachFragmentLimited)) {
 					mSavedFragment = fragments.get(i);
 					mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn),
 							Animation.getAnimation(mSavedFragment.mAnimOut));
@@ -256,7 +263,7 @@ public class FragmentTransactionSuperManager {
 					mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
 					mCurrentAdapter.mCurrentTransaction.detach(mFragment);
 					mCurrentAdapter.finishUpdate(mViewGroup);
-					;
+					mCurrentAdapter.mDetachedFragments.add(mFragment);
 
 				} else {
 					mCurrentAdapter.mSavedFragments.add(fragments.get(i));

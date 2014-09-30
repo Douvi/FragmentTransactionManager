@@ -242,8 +242,8 @@ public class FragmentTransactionManager {
 	 * @param tag - Name of the stack
 	 * @param fragments - list of Fragments
 	 */
-	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments) {
-		mFMSuper.setListOfFragmentsInStack(tag, fragments);
+	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments, boolean replacePrimaryFragmentIsDetach) {
+		mFMSuper.setListOfFragmentsInStack(tag, fragments, replacePrimaryFragmentIsDetach);
 	}
 	
 	/**
