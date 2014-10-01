@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.dovi.fragmentTransaction.layout.FTRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    
-    <!--  -->
 
     <LinearLayout
         android:id="@+id/linear"
@@ -53,11 +50,11 @@
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/fragmentContent"
+        android:id="@+id/fragmentContentTab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/linear"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" />
 
-</com.dovi.fragmentTransaction.layout.FTRelativeLayout>
+</RelativeLayout>

@@ -1,32 +1,31 @@
 package com.dovi.projectTest;
 
-import java.util.List;
-
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.TextView;
 
 import com.dovi.fragmentTransaction.FTFragment;
 import com.dovi.fragmentTransaction.OnSaveFragmentTransaction;
 import com.dovi.fragmentTransaction.layout.FTRelativeLayout;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionManager;
-import com.dovi.fragmentTransaction.manager.SavedFragment;
-import com.dovi.projectTest.fragments.MainContentFragment;
 import com.dovi.projectTest.fragments.MainMenuFragment;
+import com.dovi.projectTest.fragments.TabFragment;
 import com.example.projecttest.R;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
-public class MainActivity extends ActionBarActivity implements OnClickListener, OnSaveFragmentTransaction {
+public class MainActivity extends ActionBarActivity implements OnSaveFragmentTransaction {
 
+	public static final String CONTENT_MENU = "menu";
+	public static final String CONTENT_TABS = "tabs";
+	public static final String CONTENT_LIST = "list";
+	public static final String CONTENT_TAB1 = "tab1";
+	public static final String CONTENT_TAB2 = "tab2";
+	public static final String CONTENT_TAB3 = "tab3";
+	
 	private SlidingMenu mMenu;
 	private FTRelativeLayout mRelativeLayout;
 	public FragmentTransactionManager mFragmentTransactionManager;
-	public TextView tab1;
-	public TextView tab2;
-	public TextView tab3;
+	
 
 	public String currentStack;
 	
@@ -38,13 +37,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 		setContentView(R.layout.main_activity);
 
 		mRelativeLayout = (FTRelativeLayout) findViewById(R.id.root);
-		tab1 = (TextView) findViewById(R.id.tab1);
-		tab1.setOnClickListener(this);
-		tab2 = (TextView) findViewById(R.id.tab2);
-		tab2.setOnClickListener(this);
-		tab3 = (TextView) findViewById(R.id.tab3);
-		tab3.setOnClickListener(this);
-
+	
 		mMenu = new SlidingMenu(this);
 		mMenu.setMode(SlidingMenu.LEFT);
 		mMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
@@ -64,111 +57,59 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 
 		mFragmentTransactionManager = mRelativeLayout.getFragmentManger(getSupportFragmentManager(), this);
 		
-		if (!mFragmentTransactionManager.isContainTag("Menu")) {
-			mFragmentTransactionManager.createTag("Menu", R.id.menuContent, 1);
-			mFragmentTransactionManager.createTag("ContentTab1", R.id.fragmentContent, 1);
+		if (!mFragmentTransactionManager.isContainTag(CONTENT_MENU)) {
+			mFragmentTransactionManager.createTag(CONTENT_MENU, R.id.menuContent, 1);
+			mFragmentTransactionManager.createTag(CONTENT_TABS, R.id.fragmentContent, 1);
 			
-			mFragmentTransactionManager.addFragmentInStack("Menu", FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
+			mFragmentTransactionManager.addFragmentInStack(CONTENT_MENU, FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
 			
-			Bundle mBundle = new Bundle();
-			mBundle.putString("title", "Tab1");
-			mBundle.putString("stack", "ContentTab1");
-			mFragmentTransactionManager.addFragmentInStack("ContentTab1", FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
+//			Bundle mBundle = new Bundle();
+//			mBundle.putString("title", "Tab1");
+//			mBundle.putString("stack", "ContentTab1");
+			mFragmentTransactionManager.addFragmentInStack(CONTENT_TABS, FTFragment.instantiate(this, TabFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
 		}
 	}
 
 	@Override
 	public void onBackPressed() {
-		// TODO Auto-generated method stub
-
 		currentStack = mFragmentTransactionManager.getCurrentStackNameFromContent(R.id.fragmentContent);
 		
 		if (mMenu.isMenuShowing()) {
 
-			if (mFragmentTransactionManager.isStackEmpty("Menu")) {
+			if (mFragmentTransactionManager.isStackEmpty(CONTENT_MENU)) {
 				mMenu.showContent();
 			} else {
-				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation("Menu", true);
+				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(CONTENT_MENU, true);
 			}
 			
-		} else if (currentStack.endsWith("ContentTab1") || currentStack.endsWith("ContentTab2") || currentStack.endsWith("ContentTab3")) {
-			
-			if (mFragmentTransactionManager.isStackEmpty(currentStack)) {
-				super.onBackPressed();
-			}else {
-				
-				if (currentStack.endsWith("ContentTab3")) {
-					mFragmentTransactionManager.returnToFragmentAtPositionInStackWithAnimation("ContentTab3", 1, true);
-				} else {
-					mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(currentStack, true);
-					
-					if (currentStack.endsWith("ContentTab1")) {
-						List<SavedFragment> mList = mFragmentTransactionManager.getListOfFragmentsInStack("ContentTab3");		
-						mFragmentTransactionManager.setListOfFragmentsInStack("ContentTab2", mList, true);
-					}
-				}
-				
-				
-			}
-			
-		} else {
+		} 
+//		else if (currentStack.endsWith("ContentTab1") || currentStack.endsWith("ContentTab2") || currentStack.endsWith("ContentTab3")) {
+//			
+//			if (mFragmentTransactionManager.isStackEmpty(currentStack)) {
+//				super.onBackPressed();
+//			}else {
+//				
+//				if (currentStack.endsWith("ContentTab3")) {
+//					mFragmentTransactionManager.returnToFragmentAtPositionInStackWithAnimation("ContentTab3", 1, true);
+//				} else {
+//					mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(currentStack, true);
+//					
+//					if (currentStack.endsWith("ContentTab1")) {
+//						List<SavedFragment> mList = mFragmentTransactionManager.getListOfFragmentsInStack("ContentTab3");		
+//						mFragmentTransactionManager.setListOfFragmentsInStack("ContentTab2", mList, true);
+//					}
+//				}
+//				
+//				
+//			}
+//			
+//		} 
+		else {
 			super.onBackPressed();
 		}
 
 	}
-
-	@Override
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		Bundle mBundle = new Bundle();
-		switch (v.getId()) {
-		case R.id.tab1:
-			
-			if (mFragmentTransactionManager.getCountOfFragmentsInStack("ContentTab1") > 0) {
-				mFragmentTransactionManager.showTopFragmentInStack("ContentTab1");
-			} else {
-				mFragmentTransactionManager.createTag("ContentTab1", R.id.fragmentContent, 1);
-				mBundle.putString("title", "Tab1");
-				mBundle.putString("stack", "ContentTab1");
-				mFragmentTransactionManager.addFragmentInStack("ContentTab1",
-						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
-
-			}
-			
-			break;
-		case R.id.tab2:
-			
-			if (mFragmentTransactionManager.getCountOfFragmentsInStack("ContentTab2") > 0) {
-				mFragmentTransactionManager.showTopFragmentInStack("ContentTab2");
-			} else {
-				mFragmentTransactionManager.createTag("ContentTab2", R.id.fragmentContent, 1);
-				mBundle.putString("title", "Tab2");
-				mBundle.putString("stack", "ContentTab2");
-				mFragmentTransactionManager.addFragmentInStack("ContentTab2",
-						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
-
-			}
-			
-			break;
-		case R.id.tab3:
-			
-			if (mFragmentTransactionManager.getCountOfFragmentsInStack("ContentTab3") > 0) {
-				mFragmentTransactionManager.showTopFragmentInStack("ContentTab3");
-			} else {
-				mFragmentTransactionManager.createTag("ContentTab3", R.id.fragmentContent, 1);
-				mBundle.putString("title", "Tab3");
-				mBundle.putString("stack", "ContentTab3");
-				mFragmentTransactionManager.addFragmentInStack("ContentTab3",
-						FTFragment.instantiate(this, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
-
-			}
-			
-			break;
-		default:
-			break;
-		}
-	}
-
+	
 	@Override
 	public FragmentTransactionManager onSaveInstanceState() {
 		// TODO Auto-generated method stub

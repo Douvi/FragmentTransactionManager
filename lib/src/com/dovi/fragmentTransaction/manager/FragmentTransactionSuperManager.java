@@ -57,6 +57,18 @@ public class FragmentTransactionSuperManager {
 			this.finishInitOnRestoreInstanceState();
 		}
 	}
+	
+	public void setChildFragmentManager(String tag, FragmentManager fm) {
+		
+		isTagIsOK(tag);
+		getCurrentAdapter(tag);
+		
+		if (fm != null) {
+			mCurrentAdapter.mFragmentManager = fm;
+			mStackTags.put(tag, mCurrentAdapter);
+		}
+		
+	}
 
 	public boolean isContainTag(String tag) {
 
@@ -380,6 +392,7 @@ public class FragmentTransactionSuperManager {
 		mStack.stackDetached = new int[mStackTags.size()];
 
 		int i = 0;
+		
 		for (Entry<String, FragmentTransactionAdapter> entry : mStackTags.entrySet()) {
 			String tag = entry.getKey();
 			mCurrentAdapter = entry.getValue();

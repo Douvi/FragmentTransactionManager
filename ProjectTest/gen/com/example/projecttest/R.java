@@ -1217,7 +1217,8 @@ containing a value of this type.
         public static final int end=0x7f050013;
         public static final int expand_activities_button=0x7f05002b;
         public static final int expanded_menu=0x7f050031;
-        public static final int fragmentContent=0x7f050048;
+        public static final int fragmentContent=0x7f050049;
+        public static final int fragmentContentTab=0x7f050047;
         public static final int fullscreen=0x7f05001d;
         public static final int home=0x7f050014;
         public static final int homeAsUp=0x7f050005;
@@ -1225,12 +1226,12 @@ containing a value of this type.
         public static final int ifRoom=0x7f05000a;
         public static final int image=0x7f05002c;
         public static final int left=0x7f05001a;
-        public static final int linear=0x7f050044;
+        public static final int linear=0x7f050043;
         public static final int list=0x7f050042;
         public static final int listMode=0x7f050001;
         public static final int list_item=0x7f05002e;
         public static final int margin=0x7f05001c;
-        public static final int menuContent=0x7f050049;
+        public static final int menuContent=0x7f05004a;
         public static final int middle=0x7f050012;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
@@ -1239,7 +1240,7 @@ containing a value of this type.
         public static final int progress_horizontal=0x7f050019;
         public static final int radio=0x7f050034;
         public static final int right=0x7f05001b;
-        public static final int root=0x7f050043;
+        public static final int root=0x7f050048;
         public static final int search_badge=0x7f050037;
         public static final int search_bar=0x7f050036;
         public static final int search_button=0x7f050038;
@@ -1255,12 +1256,12 @@ containing a value of this type.
         public static final int showCustom=0x7f050007;
         public static final int showHome=0x7f050004;
         public static final int showTitle=0x7f050006;
-        public static final int slidingmenumain=0x7f05004a;
+        public static final int slidingmenumain=0x7f05004b;
         public static final int split_action_bar=0x7f050023;
         public static final int submit_area=0x7f05003e;
-        public static final int tab1=0x7f050045;
-        public static final int tab2=0x7f050046;
-        public static final int tab3=0x7f050047;
+        public static final int tab1=0x7f050044;
+        public static final int tab2=0x7f050045;
+        public static final int tab3=0x7f050046;
         public static final int tabMode=0x7f050002;
         public static final int text=0x7f050041;
         public static final int title=0x7f050030;
@@ -1321,10 +1322,11 @@ containing a value of this type.
         public static final int abc_simple_decor=0x7f030017;
         public static final int adapter=0x7f030018;
         public static final int fragment_list=0x7f030019;
-        public static final int main_activity=0x7f03001a;
-        public static final int menu_activity=0x7f03001b;
-        public static final int slidingmenumain=0x7f03001c;
-        public static final int support_simple_spinner_dropdown_item=0x7f03001d;
+        public static final int fragment_tab=0x7f03001a;
+        public static final int main_activity=0x7f03001b;
+        public static final int menu_activity=0x7f03001c;
+        public static final int slidingmenumain=0x7f03001d;
+        public static final int support_simple_spinner_dropdown_item=0x7f03001e;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 

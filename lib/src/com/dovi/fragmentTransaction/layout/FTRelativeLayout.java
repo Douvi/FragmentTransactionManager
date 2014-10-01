@@ -14,49 +14,49 @@ public class FTRelativeLayout extends RelativeLayout {
 
 	private FragmentTransactionManager fragmentManger;
 	private OnSaveFragmentTransaction mLister;
-	
+
 	public FTRelativeLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		// TODO Auto-generated constructor stub
 	}
 
 	public FTRelativeLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		// TODO Auto-generated constructor stub
 	}
 
 	public FTRelativeLayout(Context context) {
 		super(context);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	protected Parcelable onSaveInstanceState() {
-		// TODO Auto-generated method stub
+
 		fragmentManger = mLister.onSaveInstanceState();
-		
+
 		return fragmentManger.mFMSuper.onSaveInstanceState(super.onSaveInstanceState());
+
 	}
-	
+
 	@Override
 	protected void onRestoreInstanceState(Parcelable state) {
 		// TODO Auto-generated method stub
+
 		fragmentManger = new FragmentTransactionManager(getContext(), null, null);
 		super.onRestoreInstanceState(fragmentManger.mFMSuper.onRestoreInstanceState(state));
+
 	}
-	
+
 	public FragmentTransactionManager getFragmentManger(FragmentManager mFragmentManager, OnSaveFragmentTransaction lister) {
-		
+
 		if (fragmentManger == null) {
 			fragmentManger = new FragmentTransactionManager(getContext(), mFragmentManager, this);
 		} else {
 			fragmentManger.setFragmentManager(mFragmentManager);
 		}
-		
+
 		if (mLister == null) {
 			mLister = lister;
 		}
-		
+
 		return fragmentManger;
 	}
 

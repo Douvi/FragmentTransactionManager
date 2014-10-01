@@ -69,6 +69,35 @@ public class FragmentTransactionManager {
 	}
 	
 	/**
+	 * If you want to init a Fragment into an other Fragment you need to override the Activity's FragmentManager by the Fragment's FragmentManager
+	 * 
+	 * <pre>
+	 * {@code
+	 * if (mActivity.mFragmentTransactionManager.getCountOfFragmentsInStack(MainActivity.CONTENT_TAB1) > 0) {
+	 * 
+	 *	mActivity.mFragmentTransactionManager.setChildFragmentManager(MainActivity.CONTENT_TAB1, getChildFragmentManager());
+	 *	mActivity.mFragmentTransactionManager.showTopFragmentInStack(MainActivity.CONTENT_TAB1);
+	 *
+	 * } else {
+	 * 
+	 * 	mActivity.mFragmentTransactionManager.createTag(MainActivity.CONTENT_TAB1, R.id.fragmentContentTab, 1);
+	 * 	mActivity.mFragmentTransactionManager.setChildFragmentManager(MainActivity.CONTENT_TAB1, getChildFragmentManager());
+	 *  mBundle.putString("title", "Tab1");
+	 * 	mBundle.putString("stack", "ContentTab1");
+	 *  mActivity.mFragmentTransactionManager.addFragmentInStack(MainActivity.CONTENT_TAB1,
+	 *  FTFragment.instantiate(mActivity, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
+	 *  
+	 * }
+	 * </pre>
+	 * For more details check out {@link FTLinearLayout} or {@link FTRelativeLayout}.
+	 * 
+	 * @param fragmentManager
+	 */
+	public void setChildFragmentManager(String tag, FragmentManager fragmentManager) {
+		mFMSuper.setChildFragmentManager(tag, fragmentManager);
+	}
+	
+	/**
 	 * Is to check if tag exit into  FragmentTransactionManager
 	 * 
 	 * @param tag - Name of the stack

@@ -19,14 +19,12 @@ public class Adapter extends ArrayAdapter<String> {
 	protected List<String> mList = null;
 	
 	private TextView mTextView;
-	private OnClickListener mListener;
 
-	public Adapter(Context context, List<String> list, OnClickListener listener) {
+	public Adapter(Context context, List<String> list) {
 		super(context, R.layout.adapter, list);
 		mContext = context;
 		mList = list;
 		mLayout = R.layout.adapter;
-		mListener = listener;
 	}
 	
 	@Override
@@ -42,10 +40,7 @@ public class Adapter extends ArrayAdapter<String> {
 
 		mTextView.setText(text);
 		
-		row.setTag(position);
-		row.setOnClickListener(mListener);
-		
-		return(row);
+		return row;
 	}
 	
 	@Override

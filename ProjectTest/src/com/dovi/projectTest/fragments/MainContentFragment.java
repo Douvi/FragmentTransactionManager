@@ -57,7 +57,7 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 			mListString.add(i+" "+title + " | position : "+count);
 		}
 
-		mAdapter = new Adapter(getActivity(), mListString, this);
+		mAdapter = new Adapter(getActivity(), mListString);
 		mList.setAdapter(mAdapter);
 
 	}

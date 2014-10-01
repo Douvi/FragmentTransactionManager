@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.dovi.fragmentTransaction.FTFragment;
@@ -16,12 +18,13 @@ import com.dovi.projectTest.MainActivity;
 import com.dovi.projectTest.adapter.Adapter;
 import com.example.projecttest.R;
 
-public class MainMenuFragment extends FTFragment implements OnClickListener {
+public class MainMenuFragment extends FTFragment implements OnItemClickListener {
 
 	private ListView mList;
 	private Adapter mAdapter;
 	private String tag;
 	private MainActivity mActivity;
+	private List<String> mListString;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,39 +42,53 @@ public class MainMenuFragment extends FTFragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onResume();
 
-		List<String> mListString = new ArrayList<String>();
-		mListString.add("People");
-		mListString.add("Animal");
-		mListString.add("Cake");
-		mListString.add("Car");
+		mListString = new ArrayList<String>();
+		mListString.add("Tab");
+		mListString.add("List");
+		mListString.add("Sub Menu");
 
-		mAdapter = new Adapter(getActivity(), mListString, this);
+		mAdapter = new Adapter(getActivity(), mListString);
 		mList.setAdapter(mAdapter);
+		mList.setOnItemClickListener(this);
 	}
-
+	
 	@Override
-	public void onClick(View v) {
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		// TODO Auto-generated method stub
-		tag = v.getTag().toString();
-
-		Bundle mBundle = new Bundle();
-		mBundle.putString("title", tag);
-
-		mActivity.mFragmentTransactionManager.addFragmentInStack("Menu",
-				FTFragment.instantiate(mActivity, SubMenuFagment.class.getName(), mBundle, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
-
-		if (outState == null) {
-			outState = new Bundle();
+		
+		switch (position) {
+		case 0:
+			
+			if (mActivity.mFragmentTransactionManager.getCountOfFragmentsInStack(MainActivity.CONTENT_TABS) > 0) {
+				mActivity.mFragmentTransactionManager.showTopFragmentInStack(MainActivity.CONTENT_TABS);
+			} else {
+				mActivity.mFragmentTransactionManager.createTag(MainActivity.CONTENT_TABS, R.id.fragmentContent, 1);
+				mActivity.mFragmentTransactionManager.addFragmentAsRootInStack(MainActivity.CONTENT_TABS, FTFragment.instantiate(mActivity, TabFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
+			}
+			
+			break;
+		case 1:
+			
+			if (mActivity.mFragmentTransactionManager.getCountOfFragmentsInStack(MainActivity.CONTENT_LIST) > 0) {
+				mActivity.mFragmentTransactionManager.showTopFragmentInStack(MainActivity.CONTENT_LIST);
+			} else {
+				mActivity.mFragmentTransactionManager.createTag(MainActivity.CONTENT_LIST, R.id.fragmentContent, 1);
+				Bundle mBundle = new Bundle();
+				mBundle.putString("title", "List 1");
+				mBundle.putString("stack", "LIST");
+				mActivity.mFragmentTransactionManager.addFragmentAsRootInStack(MainActivity.CONTENT_LIST, FTFragment.instantiate(mActivity, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
+			}
+			
+			break;
+		case 2:
+			mActivity.mFragmentTransactionManager.addFragmentInStack(MainActivity.CONTENT_MENU,
+					FTFragment.instantiate(mActivity, MainMenuFragment.class.getName(), null, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
+			break;
+		default:
+			break;
 		}
-
-//		outState.putAll(getArguments());
-//		outState.putString("clicked", click);
-
-		super.onSaveInstanceState(outState);
+		
+		
 	}
+	
 }
