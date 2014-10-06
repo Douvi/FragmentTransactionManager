@@ -57,17 +57,20 @@ public class FragmentTransactionSuperManager {
 			this.finishInitOnRestoreInstanceState();
 		}
 	}
-	
+
 	public void setChildFragmentManager(String tag, FragmentManager fm) {
-		
-		isTagIsOK(tag);
-		getCurrentAdapter(tag);
-		
-		if (fm != null) {
-			mCurrentAdapter.mFragmentManager = fm;
-			mStackTags.put(tag, mCurrentAdapter);
+
+		synchronized (this) {
+			isTagIsOK(tag);
+
+			getCurrentAdapter(tag);
+
+			if (fm != null) {
+				mCurrentAdapter.mFragmentManager = fm;
+				updateStackTag(tag, mCurrentAdapter);
+			}
 		}
-		
+
 	}
 
 	public boolean isContainTag(String tag) {
@@ -85,7 +88,7 @@ public class FragmentTransactionSuperManager {
 		isTagIsOK(tag, false);
 
 		if (!mStackTags.containsKey(tag)) {
-			mStackTags.put(tag, new FragmentTransactionAdapter(mContext, mFragmentManager, tag, containerId, detachFragmentLimited));
+			updateStackTag(tag, new FragmentTransactionAdapter(mContext, mFragmentManager, tag, containerId, detachFragmentLimited));
 			mResouceTags.put(tag, containerId);
 			mDetachedNumTags.put(tag, detachFragmentLimited);
 		}
@@ -93,223 +96,237 @@ public class FragmentTransactionSuperManager {
 
 	public void addFragmentInStack(String tag, FTFragment fragment) {
 
-		isFragmentIsOK(fragment);
-		isTagIsOK(tag);
+		synchronized (this) {
+			isFragmentIsOK(fragment);
+			isTagIsOK(tag);
 
-		detachAllFragments(tag);
+			detachAllFragments(tag);
 
-		getCurrentAdapter(tag);
-		mCurrentAdapter.setTransactionAnimation(fragment.mAnimIn);
-		mCurrentAdapter.add(mViewGroup, fragment);
+			getCurrentAdapter(tag);
 
-		mCurrentAdapter.finishUpdate(mViewGroup);
-		mStackTags.put(tag, mCurrentAdapter);
+			mCurrentAdapter.setTransactionAnimation(fragment.mAnimIn);
+			mCurrentAdapter.add(mViewGroup, fragment);
+
+			mCurrentAdapter.finishUpdate(mViewGroup);
+			updateStackTag(tag, mCurrentAdapter);
+		}
 	}
 
 	public void addFragmentAsRootInStack(String tag, FTFragment fragment) {
 
-		isFragmentIsOK(fragment);
-		isTagIsOK(tag);
+		synchronized (this) {
 
-		getCurrentAdapter(tag);
+			isFragmentIsOK(fragment);
+			isTagIsOK(tag);
 
-		mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, tag, mCurrentAdapter.mContainerId, mCurrentAdapter.mDetachFragmentLimited);
-		mStackTags.remove(tag);
-		mStackTags.put(tag, mCurrentAdapter);
+			getCurrentAdapter(tag);
 
-		addFragmentInStack(tag, fragment);
+			mCurrentAdapter = new FragmentTransactionAdapter(mContext, mFragmentManager, tag, mCurrentAdapter.mContainerId,
+					mCurrentAdapter.mDetachFragmentLimited);
+			mStackTags.remove(tag);
+			updateStackTag(tag, mCurrentAdapter);
+
+			addFragmentInStack(tag, fragment);
+		}
 	}
 
 	public void showTopFragmentInStack(String tag) {
 
-		isTagIsOK(tag);
+		synchronized (this) {
+			isTagIsOK(tag);
 
-		detachAllFragments(tag);
+			detachAllFragments(tag);
 
-		getCurrentAdapter(tag);
+			getCurrentAdapter(tag);
 
-		mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
-		mCurrentAdapter.finishUpdate(mViewGroup);
-		mStackTags.put(tag, mCurrentAdapter);
+			mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
+			mCurrentAdapter.finishUpdate(mViewGroup);
+			updateStackTag(tag, mCurrentAdapter);
+		}
 
 	}
 
 	public void removeTopFragmentInStackWithAnimation(String tag, Boolean animation) {
 
-		isTagIsOK(tag);
+		synchronized (this) {
+			isTagIsOK(tag);
+			getCurrentAdapter(tag);
 
-		getCurrentAdapter(tag);
-
-		removeTopFragmentInStackWithAnimation(animation);
+			removeTopFragmentInStackWithAnimation(animation);
+		}
 
 	}
 
 	public void returnToFragmentAtPositionInStackWithAnimation(String tag, int position, Boolean animation) {
+		synchronized (this) {
+			isTagIsOK(tag);
 
-		isTagIsOK(tag);
+			getCurrentAdapter(tag);
 
-		getCurrentAdapter(tag);
-		
-		position = position < 0 ? 0 : position; 
-		
-		if (position >= 0 && position <= mCurrentAdapter.getCount()) {
-			mCurrentAdapter.removed(mCurrentAdapter.mCurrentPrimaryItem);
-			
-			fragment = null;
-			while (mCurrentAdapter.getCount() > position && mCurrentAdapter.getCount() > 0) {
-				
-				if (fragment != null) {
-					mCurrentAdapter.removed(fragment);
+			position = position < 0 ? 0 : position;
+
+			if (position >= 0 && position <= mCurrentAdapter.getCount()) {
+				mCurrentAdapter.removed(mCurrentAdapter.mCurrentPrimaryItem);
+
+				fragment = null;
+				while (mCurrentAdapter.getCount() > position && mCurrentAdapter.getCount() > 0) {
+
+					if (fragment != null) {
+						mCurrentAdapter.removed(fragment);
+					}
+
+					fragment = (FTFragment) mCurrentAdapter.instantiateItem(mViewGroup, mCurrentAdapter.getCount());
+
 				}
-				
-				fragment = (FTFragment) mCurrentAdapter.instantiateItem(mViewGroup, mCurrentAdapter.getCount());
-				
-			}
-			
-			if (fragment != null) {
-				mCurrentAdapter.setPrimaryItem(mViewGroup, mCurrentAdapter.getCount(), fragment);
 
-				mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
+				if (fragment != null) {
+					mCurrentAdapter.setPrimaryItem(mViewGroup, mCurrentAdapter.getCount(), fragment);
+
+					mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
+				}
+
+				mCurrentAdapter.finishUpdate(mViewGroup);
+				updateStackTag(mCurrentTag, mCurrentAdapter);
 			}
-			
-			mCurrentAdapter.finishUpdate(mViewGroup);
-			mStackTags.put(mCurrentTag, mCurrentAdapter);
 		}
 	}
 
 	public void returnToRootFragmentInStackWithAnimation(String tag, Boolean animation) {
+		synchronized (this) {
+			isTagIsOK(tag);
 
-		isTagIsOK(tag);
+			getCurrentAdapter(tag);
 
-		getCurrentAdapter(tag);
+			if (mCurrentAdapter.mSavedFragments.size() > 0) {
 
-		if (mCurrentAdapter.mSavedFragments.size() > 0) {
+				SavedFragment mSavedFragment = mCurrentAdapter.mSavedFragments.get(0);
+				mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
+				mCurrentAdapter.mSavedFragments.add(mSavedFragment);
 
-			SavedFragment mSavedFragment = mCurrentAdapter.mSavedFragments.get(0);
-			mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
-			mCurrentAdapter.mSavedFragments.add(mSavedFragment);
+				mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
+				mCurrentAdapter.fragmentsNumb = 1;
 
-			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
-			mCurrentAdapter.fragmentsNumb = 1;
+			} else if (mCurrentAdapter.mDetachedFragments.size() > 0) {
 
-		} else if (mCurrentAdapter.mDetachedFragments.size() > 0) {
+				FTFragment mFTFragment = mCurrentAdapter.mDetachedFragments.get(0);
+				mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
+				mCurrentAdapter.mDetachedFragments.add(mFTFragment);
+				mCurrentAdapter.fragmentsNumb = 1;
+			}
 
-			FTFragment mFTFragment = mCurrentAdapter.mDetachedFragments.get(0);
-			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
-			mCurrentAdapter.mDetachedFragments.add(mFTFragment);
-			mCurrentAdapter.fragmentsNumb = 1;
+			removeTopFragmentInStackWithAnimation(animation);
 		}
-
-		removeTopFragmentInStackWithAnimation(animation);
 	}
 
 	public List<SavedFragment> getListOfFragmentsInStack(String tag) {
+		synchronized (this) {
+			isTagIsOK(tag);
 
-		isTagIsOK(tag);
+			List<SavedFragment> mFragments = new ArrayList<SavedFragment>();
+			getCurrentAdapter(tag);
 
-		getCurrentAdapter(tag);
+			if (mCurrentAdapter.mSavedFragments.size() > 0) {
+				mFragments = new ArrayList<SavedFragment>(mCurrentAdapter.mSavedFragments);
+			}
 
-		List<SavedFragment> mFragments = new ArrayList<SavedFragment>();
+			FTFragment mFTFragment;
 
-		if (mCurrentAdapter.mSavedFragments.size() > 0) {
-			mFragments = new ArrayList<SavedFragment>(mCurrentAdapter.mSavedFragments);
+			for (int i = 0; i < mCurrentAdapter.mDetachedFragments.size(); i++) {
+
+				mFTFragment = mCurrentAdapter.mDetachedFragments.get(i);
+				mFragments.add(new SavedFragment(mFTFragment.getClass().getName(), mFTFragment.mExtraOutState, mFTFragment.mAnimIn.getAnimation(),
+						mFTFragment.mAnimOut.getAnimation()));
+
+			}
+
+			if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached()) {
+
+				mCurrentAdapter.mCurrentPrimaryItem.onSaveInstanceState(mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState);
+				mFragments.add(new SavedFragment(mCurrentAdapter.mCurrentPrimaryItem.getClass().getName(), mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState,
+						mCurrentAdapter.mCurrentPrimaryItem.mAnimIn.getAnimation(), mCurrentAdapter.mCurrentPrimaryItem.mAnimOut.getAnimation()));
+
+			}
+
+			return mFragments;
 		}
-
-		FTFragment mFTFragment;
-
-		for (int i = 0; i < mCurrentAdapter.mDetachedFragments.size(); i++) {
-
-			mFTFragment = mCurrentAdapter.mDetachedFragments.get(i);
-			mFragments.add(new SavedFragment(mFTFragment.getClass().getName(), mFTFragment.mExtraOutState, mFTFragment.mAnimIn.getAnimation(),
-					mFTFragment.mAnimOut.getAnimation()));
-
-		}
-
-		if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached()) {
-
-			mCurrentAdapter.mCurrentPrimaryItem.onSaveInstanceState(mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState);
-			mFragments.add(new SavedFragment(mCurrentAdapter.mCurrentPrimaryItem.getClass().getName(), mCurrentAdapter.mCurrentPrimaryItem.mExtraOutState,
-					mCurrentAdapter.mCurrentPrimaryItem.mAnimIn.getAnimation(), mCurrentAdapter.mCurrentPrimaryItem.mAnimOut.getAnimation()));
-
-		}
-
-		return mFragments;
 	}
 
 	public void setListOfFragmentsInStack(String tag, List<SavedFragment> fragments, boolean replacePrimaryFragmentIsDetach) {
+		synchronized (this) {
+			isTagIsOK(tag);
 
-		isTagIsOK(tag);
+			getCurrentAdapter(tag);
 
-		getCurrentAdapter(tag);
+			mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
+			mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
 
-		mCurrentAdapter.mSavedFragments = new ArrayList<SavedFragment>();
-		mCurrentAdapter.mDetachedFragments = new ArrayList<FTFragment>();
-		
-		FTFragment mFragment = null;
-		SavedFragment mSavedFragment = null;
+			FTFragment mFragment = null;
+			SavedFragment mSavedFragment = null;
 
-		if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached() && replacePrimaryFragmentIsDetach) {
+			if (mCurrentAdapter.mCurrentPrimaryItem != null && mCurrentAdapter.mCurrentPrimaryItem.isDetached() && replacePrimaryFragmentIsDetach) {
 
-			mCurrentAdapter.fragmentsNumb = fragments.size();
-			
-			for (int i = 0; i < fragments.size(); i++) {
+				mCurrentAdapter.fragmentsNumb = fragments.size();
 
-				if (i == fragments.size() - 1) {
+				for (int i = 0; i < fragments.size(); i++) {
 
-					mSavedFragment = fragments.get(i);
-					mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn),
-							Animation.getAnimation(mSavedFragment.mAnimOut));
-					mFragment.setMenuVisibility(false);
-					mFragment.setUserVisibleHint(false);
+					if (i == fragments.size() - 1) {
 
-					mCurrentAdapter.getCurrentTransaction();
-					mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
-					mCurrentAdapter.mCurrentTransaction.detach(mFragment);
-					mCurrentAdapter.mCurrentPrimaryItem = mFragment;
-					mCurrentAdapter.mIsCurrentPrimaryItemDetatch = true;
-					mCurrentAdapter.finishUpdate(mViewGroup);
+						mSavedFragment = fragments.get(i);
+						mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle,
+								Animation.getAnimation(mSavedFragment.mAnimIn), Animation.getAnimation(mSavedFragment.mAnimOut));
+						mFragment.setMenuVisibility(false);
+						mFragment.setUserVisibleHint(false);
 
-				} else if (i >= ((fragments.size() - mCurrentAdapter.mDetachFragmentLimited) - 1)) {
-					mSavedFragment = fragments.get(i);
-					mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn),
-							Animation.getAnimation(mSavedFragment.mAnimOut));
-					mFragment.setMenuVisibility(false);
-					mFragment.setUserVisibleHint(false);
+						mCurrentAdapter.getCurrentTransaction();
+						mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
+						mCurrentAdapter.mCurrentTransaction.detach(mFragment);
+						mCurrentAdapter.mCurrentPrimaryItem = mFragment;
+						mCurrentAdapter.mIsCurrentPrimaryItemDetatch = true;
+						mCurrentAdapter.finishUpdate(mViewGroup);
 
-					mCurrentAdapter.getCurrentTransaction();
-					mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
-					mCurrentAdapter.mCurrentTransaction.detach(mFragment);
-					mCurrentAdapter.finishUpdate(mViewGroup);
-					mCurrentAdapter.mDetachedFragments.add(mFragment);
+					} else if (i >= ((fragments.size() - mCurrentAdapter.mDetachFragmentLimited) - 1)) {
+						mSavedFragment = fragments.get(i);
+						mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle,
+								Animation.getAnimation(mSavedFragment.mAnimIn), Animation.getAnimation(mSavedFragment.mAnimOut));
+						mFragment.setMenuVisibility(false);
+						mFragment.setUserVisibleHint(false);
 
-				} else {
-					mCurrentAdapter.mSavedFragments.add(fragments.get(i));
+						mCurrentAdapter.getCurrentTransaction();
+						mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
+						mCurrentAdapter.mCurrentTransaction.detach(mFragment);
+						mCurrentAdapter.finishUpdate(mViewGroup);
+						mCurrentAdapter.mDetachedFragments.add(mFragment);
+
+					} else {
+						mCurrentAdapter.mSavedFragments.add(fragments.get(i));
+					}
+				}
+
+			} else {
+
+				mCurrentAdapter.fragmentsNumb = fragments.size();
+
+				for (int i = 0; i < fragments.size(); i++) {
+
+					if (i >= (fragments.size() - mCurrentAdapter.mDetachFragmentLimited)) {
+						mSavedFragment = fragments.get(i);
+						mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle,
+								Animation.getAnimation(mSavedFragment.mAnimIn), Animation.getAnimation(mSavedFragment.mAnimOut));
+						mFragment.setMenuVisibility(false);
+						mFragment.setUserVisibleHint(false);
+
+						mCurrentAdapter.getCurrentTransaction();
+						mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
+						mCurrentAdapter.mCurrentTransaction.detach(mFragment);
+						mCurrentAdapter.finishUpdate(mViewGroup);
+						mCurrentAdapter.mDetachedFragments.add(mFragment);
+
+					} else {
+						mCurrentAdapter.mSavedFragments.add(fragments.get(i));
+					}
 				}
 			}
-
-		} else {
-
-			mCurrentAdapter.fragmentsNumb = fragments.size();
-			
-			for (int i = 0; i < fragments.size(); i++) {
-
-				if (i >= (fragments.size() - mCurrentAdapter.mDetachFragmentLimited)) {
-					mSavedFragment = fragments.get(i);
-					mFragment = FTFragment.instantiate(mContext, mSavedFragment.mPath, mSavedFragment.mBundle, Animation.getAnimation(mSavedFragment.mAnimIn),
-							Animation.getAnimation(mSavedFragment.mAnimOut));
-					mFragment.setMenuVisibility(false);
-					mFragment.setUserVisibleHint(false);
-
-					mCurrentAdapter.getCurrentTransaction();
-					mCurrentAdapter.mCurrentTransaction.add(mCurrentAdapter.mContainerId, mFragment, mCurrentAdapter.getFragmentName(i));
-					mCurrentAdapter.mCurrentTransaction.detach(mFragment);
-					mCurrentAdapter.finishUpdate(mViewGroup);
-					mCurrentAdapter.mDetachedFragments.add(mFragment);
-
-				} else {
-					mCurrentAdapter.mSavedFragments.add(fragments.get(i));
-				}
-			}
+			updateStackTag(tag, mCurrentAdapter);
 		}
 	}
 
@@ -329,7 +346,7 @@ public class FragmentTransactionSuperManager {
 			mCurrentAdapter.attach(mViewGroup, mCurrentAdapter.mCurrentPrimaryItem);
 			mCurrentAdapter.finishUpdate(mViewGroup);
 
-			mStackTags.put(mCurrentTag, mCurrentAdapter);
+			updateStackTag(mCurrentTag, mCurrentAdapter);
 		}
 
 	}
@@ -361,23 +378,45 @@ public class FragmentTransactionSuperManager {
 	}
 
 	public String getCurrentStackNameFromContent(int resourceId) {
+		synchronized (mCurrentAdapter) {
+			if (mResouceTags.get(mCurrentTag) == resourceId && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+				return mCurrentTag;
+			} else {
 
-		if (mResouceTags.get(mCurrentTag) == resourceId && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
-			return mCurrentTag;
-		} else {
+				for (String tag : mResouceTags.keySet()) {
 
-			for (String tag : mResouceTags.keySet()) {
+					if (mResouceTags.get(tag) == resourceId) {
 
-				if (mResouceTags.get(tag) == resourceId) {
+						getCurrentAdapter(tag);
+						if (!mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+							return mCurrentTag;
+						}
+					}
+				}
 
-					getCurrentAdapter(tag);
-					if (!mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
-						return mCurrentTag;
+				return null;
+			}
+		}
+	}
+
+	public void detachFragmentsChildrenFromResource(int resourceId) {
+
+		synchronized (mCurrentAdapter) {
+			Iterator<Entry<String, Integer>> it = mResouceTags.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry<String, Integer> pairs = it.next();
+
+				if (resourceId == pairs.getValue()) {
+
+					mCurrentAdapter = mStackTags.get(pairs.getKey());
+
+					if (mCurrentAdapter.mCurrentPrimaryItem != null && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
+						mCurrentAdapter.detach(mCurrentAdapter.mCurrentPrimaryItem);
+						mCurrentAdapter.finishUpdate(mViewGroup);
+						updateStackTag(pairs.getKey(), mCurrentAdapter);
 					}
 				}
 			}
-
-			return null;
 		}
 	}
 
@@ -391,22 +430,39 @@ public class FragmentTransactionSuperManager {
 		mStack.stackResources = new int[mStackTags.size()];
 		mStack.stackDetached = new int[mStackTags.size()];
 
-		int i = 0;
-		
-		for (Entry<String, FragmentTransactionAdapter> entry : mStackTags.entrySet()) {
-			String tag = entry.getKey();
-			mCurrentAdapter = entry.getValue();
+		int x = 0;
+
+		// for (Entry<String, FragmentTransactionAdapter> entry :
+		// mStackTags.entrySet()) {
+		List<String> list = new ArrayList<String>(mStackTags.keySet());
+
+		for (int i = list.size() - 1; i >= 0; i--) {
+			String tag = list.get(i);
+			mCurrentAdapter = mStackTags.get(tag);
 			mCurrentAdapter.getCurrentTransaction();
 
-			mStack.stackTags[i] = tag;
-			mStack.stackAdapter[i] = mCurrentAdapter.saveState();
-			mStack.stackResources[i] = mResouceTags.get(tag);
-			mStack.stackDetached[i] = mDetachedNumTags.get(tag);
+			mStack.stackTags[x] = tag;
+			mStack.stackAdapter[x] = mCurrentAdapter.saveState();
+			mStack.stackResources[x] = mResouceTags.get(tag);
+			mStack.stackDetached[x] = mDetachedNumTags.get(tag);
 
 			mCurrentAdapter.finishUpdate(mViewGroup);
-
-			i++;
+			x++;
 		}
+
+		// String tag = entry.getKey();
+		// mCurrentAdapter = entry.getValue();
+		// mCurrentAdapter.getCurrentTransaction();
+		//
+		// mStack.stackTags[i] = tag;
+		// mStack.stackAdapter[i] = mCurrentAdapter.saveState();
+		// mStack.stackResources[i] = mResouceTags.get(tag);
+		// mStack.stackDetached[i] = mDetachedNumTags.get(tag);
+		//
+		// mCurrentAdapter.finishUpdate(mViewGroup);
+		//
+		// i++;
+		// }
 
 		return mStack;
 	}
@@ -448,7 +504,7 @@ public class FragmentTransactionSuperManager {
 			mCurrentAdapter.getCurrentTransaction();
 			mCurrentAdapter.restoreState(mRestoredStackAdapter[i], SavedStackState.class.getClassLoader());
 			mCurrentAdapter.finishUpdate(mViewGroup);
-			mStackTags.put(mCurrentTag, mCurrentAdapter);
+			updateStackTag(mCurrentTag, mCurrentAdapter);
 
 		}
 
@@ -485,6 +541,15 @@ public class FragmentTransactionSuperManager {
 
 	}
 
+	private void updateStackTag(String tag, FragmentTransactionAdapter mAdapter) {
+
+		if (tag.equals(mAdapter.mTag)) {
+			mStackTags.put(tag, mAdapter);
+		} else {
+			System.out.println();
+		}
+	}
+
 	private void getCurrentAdapter(String tag) {
 		mCurrentAdapter = mStackTags.get(tag);
 		mCurrentTag = tag;
@@ -507,7 +572,7 @@ public class FragmentTransactionSuperManager {
 					if (mCurrentAdapter.mCurrentPrimaryItem != null && !mCurrentAdapter.mIsCurrentPrimaryItemDetatch) {
 						mCurrentAdapter.detach(mCurrentAdapter.mCurrentPrimaryItem);
 						mCurrentAdapter.finishUpdate(mViewGroup);
-						mStackTags.put(pairs.getKey(), mCurrentAdapter);
+						updateStackTag(pairs.getKey(), mCurrentAdapter);
 					}
 				}
 			}

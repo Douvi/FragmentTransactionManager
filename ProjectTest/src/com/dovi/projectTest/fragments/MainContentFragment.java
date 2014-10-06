@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.dovi.fragmentTransaction.FTFragment;
@@ -16,7 +18,7 @@ import com.dovi.projectTest.MainActivity;
 import com.dovi.projectTest.adapter.Adapter;
 import com.example.projecttest.R;
 
-public class MainContentFragment extends FTFragment implements OnClickListener {
+public class MainContentFragment extends FTFragment implements OnItemClickListener {
 
 	private ListView mList;
 	private Adapter mAdapter;
@@ -59,14 +61,12 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 
 		mAdapter = new Adapter(getActivity(), mListString);
 		mList.setAdapter(mAdapter);
-
+		mList.setOnItemClickListener(this);
 	}
 
 	@Override
-	public void onClick(View v) {
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		// TODO Auto-generated method stub
-		tag = v.getTag().toString();
-
 		count++;
 		
 		Bundle mBundle = new Bundle();
@@ -77,7 +77,7 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 		mActivity.mFragmentTransactionManager.addFragmentInStack(stack,
 				FTFragment.instantiate(mActivity, MainContentFragment.class.getName(), mBundle, Animation.ANIM_RIGHT_TO_LEFT, Animation.ANIM_LEFT_TO_RIGHT));
 	}
-
+	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		// TODO Auto-generated method stub
@@ -91,4 +91,6 @@ public class MainContentFragment extends FTFragment implements OnClickListener {
 
 		super.onSaveInstanceState(outState);
 	}
+
+	
 }

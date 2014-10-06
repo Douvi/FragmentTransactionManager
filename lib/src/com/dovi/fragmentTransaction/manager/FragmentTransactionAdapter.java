@@ -10,6 +10,7 @@ import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -88,6 +89,7 @@ public class FragmentTransactionAdapter extends SuperFragmentTransactionAdapter 
 		getCurrentTransaction();
 
 		fragment.onSaveInstanceState(fragment.mExtraOutState);
+		fragment.onDetach();
 		mCurrentTransaction.detach(fragment);
 		mIsCurrentPrimaryItemDetatch = true;
 	}
@@ -104,6 +106,7 @@ public class FragmentTransactionAdapter extends SuperFragmentTransactionAdapter 
 
 		this.setPrimaryItem(viewGroup, fragmentsNumb, fragment);
 		mCurrentTransaction.attach(fragment);
+		fragment.onAttach(fragment.getActivity());
 	}
 
 	public void setTransactionAnimation(Animation animation) {
@@ -297,6 +300,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 	}
 
 	protected String getFragmentName(int position) {
+		Log.i(TAG, "Tag:" + mTag + "-Container:" + mContainerId + "-Position:" + position);
 		return "Tag:" + mTag + "-Container:" + mContainerId + "-Position:" + position;
 	}
 
@@ -325,7 +329,8 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 				state.putInt("fragment-detached-animIn" + i, fragment.mAnimIn.getAnimation());
 				state.putInt("fragment-detached-animOut" + i, fragment.mAnimOut.getAnimation());
 				state.putString("fragment-detached-path" + i, fragment.getClass().getName());
-				mCurrentTransaction.remove(fragment);
+//				state.putString("fragment-detached-tag" + i, getFragmentName(mSavedFragments.size() + i));
+//				mCurrentTransaction.remove(fragment);
 			}
 		}
 
@@ -336,6 +341,7 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			state.putInt("primary-fragment-animOut", mCurrentPrimaryItem.mAnimOut.getAnimation());
 			state.putString("primary-fragment-path", mCurrentPrimaryItem.getClass().getName());
 			state.putBoolean("primary-fragment-type", mCurrentPrimaryItem.isDetached());
+//			state.putString("primary-fragment-tag", getFragmentName(fragmentsNumb));
 		} 
 		
 		return state;
@@ -366,35 +372,54 @@ abstract class SuperFragmentTransactionAdapter extends PagerAdapter {
 			fragmentsNumb = mBundle.getInt("fragmentsNumb");
 			
 			for (int i = 0; i < nb; i++) {
-				fragment = FTFragment.instantiate(mContext, mBundle.getString("fragment-detached-path" + i), mBundle.getBundle("fragment-detached-bundle" + i), Animation.getAnimation(mBundle.getInt("fragment-detached-animIn" + i)), Animation.getAnimation(mBundle.getInt("fragment-detached-animOut" + i)));
-
+				
+				fragment = (FTFragment) mFragmentManager.findFragmentByTag(this.getFragmentName(i + mSavedFragments.size()));
+				
 				if (fragment != null) {
-					fragment.setMenuVisibility(false);
-					fragment.setUserVisibleHint(false);
+					fragment.mAnimIn = Animation.getAnimation(mBundle.getInt("fragment-detached-animIn" + i));
+					fragment.mAnimOut = Animation.getAnimation(mBundle.getInt("fragment-detached-animOut" + i));
+					fragment.mExtraOutState = mBundle.getBundle("fragment-detached-bundle" + i);
 					mDetachedFragments.add(fragment);
-					
-					mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(i + mSavedFragments.size()));
-					mCurrentTransaction.detach(fragment);
+				} else {
+					fragment = FTFragment.instantiate(mContext, mBundle.getString("fragment-detached-path" + i), mBundle.getBundle("fragment-detached-bundle" + i), Animation.getAnimation(mBundle.getInt("fragment-detached-animIn" + i)), Animation.getAnimation(mBundle.getInt("fragment-detached-animOut" + i)));
+
+					if (fragment != null) {
+						fragment.setMenuVisibility(false);
+						fragment.setUserVisibleHint(false);
+						mDetachedFragments.add(fragment);
+						
+						mCurrentTransaction.add(mContainerId, fragment, this.getFragmentName(i + mSavedFragments.size()));
+						mCurrentTransaction.detach(fragment);
+					}
 				}
 			}
 			
-			fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn", 0)), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut", 0)));
+			fragment = (FTFragment) mFragmentManager.findFragmentByTag(this.getFragmentName(fragmentsNumb));
 			
 			if (fragment != null) {
-				fragment.setMenuVisibility(false);
-				fragment.setMenuVisibility(false);
+				fragment.mAnimIn = Animation.getAnimation(mBundle.getInt("primary-fragment-animIn"));
+				fragment.mAnimOut = Animation.getAnimation(mBundle.getInt("primary-fragment-animOut"));
+				fragment.mExtraOutState = mBundle.getBundle("primary-fragment-bundle");
 				mCurrentPrimaryItem = fragment;
+			} else {
+				fragment = FTFragment.instantiate(mContext, mBundle.getString("primary-fragment-path"), mBundle.getBundle("primary-fragment-bundle"), Animation.getAnimation(mBundle.getInt("primary-fragment-animIn", 0)), Animation.getAnimation(mBundle.getInt("primary-fragment-animOut", 0)));
 				
-				mCurrentTransaction.remove(mCurrentPrimaryItem);
-				mCurrentTransaction.add(mContainerId, mCurrentPrimaryItem, this.getFragmentName(fragmentsNumb));
-				mIsCurrentPrimaryItemDetatch = mBundle.getBoolean("primary-fragment-type");
-				
-				if (mIsCurrentPrimaryItemDetatch) {
-					mCurrentTransaction.detach(mCurrentPrimaryItem);
-				}
-				
-			} 
-			
+				if (fragment != null) {
+					fragment.setMenuVisibility(false);
+					fragment.setMenuVisibility(false);
+					mCurrentPrimaryItem = fragment;
+					
+					mCurrentTransaction.remove(mCurrentPrimaryItem);
+					mCurrentTransaction.add(mContainerId, mCurrentPrimaryItem, this.getFragmentName(fragmentsNumb));
+					mIsCurrentPrimaryItemDetatch = mBundle.getBoolean("primary-fragment-type");
+					
+					if (mIsCurrentPrimaryItemDetatch) {
+						mCurrentTransaction.detach(mCurrentPrimaryItem);
+					}
+					
+				} 
+			}
+
 			mBundle = null;
 		}
 	}

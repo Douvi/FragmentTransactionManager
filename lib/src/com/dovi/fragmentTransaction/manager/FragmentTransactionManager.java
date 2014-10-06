@@ -290,6 +290,10 @@ public class FragmentTransactionManager {
 		return mFMSuper.getCurrentStackNameFromContent(resourceId);
 	}
 	
+	public void detachFragmentsChildrenFromResource(int resourceId) {
+		mFMSuper.detachFragmentsChildrenFromResource(resourceId);
+	}
+	
 	/**
 	 * Use this method to remove a specific resource.
 	 * This should be use for specific case like MapView. 

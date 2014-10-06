@@ -65,7 +65,7 @@ public class MainMenuFragment extends FTFragment implements OnItemClickListener 
 				mActivity.mFragmentTransactionManager.createTag(MainActivity.CONTENT_TABS, R.id.fragmentContent, 1);
 				mActivity.mFragmentTransactionManager.addFragmentAsRootInStack(MainActivity.CONTENT_TABS, FTFragment.instantiate(mActivity, TabFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
 			}
-			
+			mActivity.mMenu.showContent();
 			break;
 		case 1:
 			
@@ -75,10 +75,10 @@ public class MainMenuFragment extends FTFragment implements OnItemClickListener 
 				mActivity.mFragmentTransactionManager.createTag(MainActivity.CONTENT_LIST, R.id.fragmentContent, 1);
 				Bundle mBundle = new Bundle();
 				mBundle.putString("title", "List 1");
-				mBundle.putString("stack", "LIST");
+				mBundle.putString("stack", MainActivity.CONTENT_LIST);
 				mActivity.mFragmentTransactionManager.addFragmentAsRootInStack(MainActivity.CONTENT_LIST, FTFragment.instantiate(mActivity, MainContentFragment.class.getName(), mBundle, Animation.ANIM_NONE, Animation.ANIM_NONE));
 			}
-			
+			mActivity.mMenu.showContent();
 			break;
 		case 2:
 			mActivity.mFragmentTransactionManager.addFragmentInStack(MainActivity.CONTENT_MENU,

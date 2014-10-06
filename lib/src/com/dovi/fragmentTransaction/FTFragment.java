@@ -36,5 +36,9 @@ public class FTFragment extends Fragment {
 		return f;
 	}
 	
+	public void fragmentIsOn(){
+		
+	}
+	
 	
 }

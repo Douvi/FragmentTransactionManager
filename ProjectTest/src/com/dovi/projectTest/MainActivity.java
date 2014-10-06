@@ -1,6 +1,8 @@
 package com.dovi.projectTest;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 
 import com.dovi.fragmentTransaction.FTFragment;
@@ -8,6 +10,7 @@ import com.dovi.fragmentTransaction.OnSaveFragmentTransaction;
 import com.dovi.fragmentTransaction.layout.FTRelativeLayout;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionAdapter.Animation;
 import com.dovi.fragmentTransaction.manager.FragmentTransactionManager;
+import com.dovi.projectTest.fragments.MainContentFragment;
 import com.dovi.projectTest.fragments.MainMenuFragment;
 import com.dovi.projectTest.fragments.TabFragment;
 import com.example.projecttest.R;
@@ -22,7 +25,7 @@ public class MainActivity extends ActionBarActivity implements OnSaveFragmentTra
 	public static final String CONTENT_TAB2 = "tab2";
 	public static final String CONTENT_TAB3 = "tab3";
 	
-	private SlidingMenu mMenu;
+	public SlidingMenu mMenu;
 	private FTRelativeLayout mRelativeLayout;
 	public FragmentTransactionManager mFragmentTransactionManager;
 	
@@ -63,10 +66,8 @@ public class MainActivity extends ActionBarActivity implements OnSaveFragmentTra
 			
 			mFragmentTransactionManager.addFragmentInStack(CONTENT_MENU, FTFragment.instantiate(this, MainMenuFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
 			
-//			Bundle mBundle = new Bundle();
-//			mBundle.putString("title", "Tab1");
-//			mBundle.putString("stack", "ContentTab1");
 			mFragmentTransactionManager.addFragmentInStack(CONTENT_TABS, FTFragment.instantiate(this, TabFragment.class.getName(), null, Animation.ANIM_NONE, Animation.ANIM_NONE));
+			
 		}
 	}
 
@@ -82,29 +83,24 @@ public class MainActivity extends ActionBarActivity implements OnSaveFragmentTra
 				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(CONTENT_MENU, true);
 			}
 			
-		} 
-//		else if (currentStack.endsWith("ContentTab1") || currentStack.endsWith("ContentTab2") || currentStack.endsWith("ContentTab3")) {
-//			
-//			if (mFragmentTransactionManager.isStackEmpty(currentStack)) {
-//				super.onBackPressed();
-//			}else {
-//				
-//				if (currentStack.endsWith("ContentTab3")) {
-//					mFragmentTransactionManager.returnToFragmentAtPositionInStackWithAnimation("ContentTab3", 1, true);
-//				} else {
-//					mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(currentStack, true);
-//					
-//					if (currentStack.endsWith("ContentTab1")) {
-//						List<SavedFragment> mList = mFragmentTransactionManager.getListOfFragmentsInStack("ContentTab3");		
-//						mFragmentTransactionManager.setListOfFragmentsInStack("ContentTab2", mList, true);
-//					}
-//				}
-//				
-//				
-//			}
-//			
-//		} 
-		else {
+		} else if (currentStack.equals(CONTENT_LIST)) {			
+			
+			if (mFragmentTransactionManager.isStackEmpty(CONTENT_LIST)) {
+				super.onBackPressed();
+			} else {
+				mFragmentTransactionManager.removeTopFragmentInStackWithAnimation(CONTENT_LIST, true);
+			}
+			
+		} else if (currentStack.equals(CONTENT_TABS)) {
+			
+			currentStack = mFragmentTransactionManager.getCurrentStackNameFromContent(R.id.fragmentContentTab);
+			if (mFragmentTransactionManager.isStackEmpty(currentStack)) {
+				super.onBackPressed();
+			} else {
+				mFragmentTransactionManager.returnToRootFragmentInStackWithAnimation(currentStack, true);
+			}
+			
+		} else {
 			super.onBackPressed();
 		}
 
@@ -115,5 +111,5 @@ public class MainActivity extends ActionBarActivity implements OnSaveFragmentTra
 		// TODO Auto-generated method stub
 		return mFragmentTransactionManager;
 	}
-
+		
 }
